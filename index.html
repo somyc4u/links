@@ -3,95 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>אוצרות מהרשת</title>
+    <title>אוצרות מהרשת - דף הבית</title>
     <style>
-        :root {
-            --primary-color: #FFD700;
-            --bg-color: #000000;
-            --card-bg: #1A1A1A;
-            --text-color: #ffffff;
-        }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
+            background-color: #000;
+            color: #fff;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
+            padding: 50px 20px;
+            margin: 0;
             min-height: 100vh;
         }
-        header { text-align: center; margin-bottom: 20px; }
-        #searchBar {
-            width: 100%;
-            max-width: 400px;
-            padding: 12px;
-            border: 2px solid #333;
-            border-radius: 25px;
+        .logo {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+        h1 {
+            color: #FFD700;
+            margin: 0;
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .tagline {
+            color: #aaa;
+            margin-bottom: 40px;
             font-size: 16px;
-            margin-bottom: 20px;
-            background: #222;
-            color: white;
-            outline: none;
-            text-align: center;
         }
-        #searchBar:focus { border-color: var(--primary-color); }
-        .links-container { width: 100%; max-width: 400px; }
-        .link-card {
-            background: var(--card-bg);
-            margin-bottom: 12px;
+        .nav-container {
+            width: 100%;
+            max-width: 380px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .btn {
+            width: 100%;
             padding: 18px;
-            border-radius: 12px;
-            display: block;
+            border-radius: 50px;
             text-decoration: none;
-            color: var(--primary-color);
             font-weight: bold;
-            transition: 0.3s;
+            font-size: 18px;
             text-align: center;
-            border: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            border: 1px solid transparent;
         }
-        .link-card:active { transform: scale(0.98); }
-        .no-results { display: none; color: #888; margin-top: 20px; }
+        /* כפתור זהב - מבצעים */
+        .btn-gold {
+            background: linear-gradient(45deg, #FFD700, #B8860B);
+            color: #000;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+        /* כפתור וואטסאפ */
+        .btn-whatsapp {
+            background-color: transparent;
+            border-color: #25D366;
+            color: #25D366;
+        }
+        /* כפתור טיקטוק */
+        .btn-tiktok {
+            background-color: transparent;
+            border-color: #fff;
+            color: #fff;
+        }
+        .btn:hover {
+            transform: scale(1.03);
+            opacity: 0.9;
+        }
+        .footer {
+            margin-top: auto;
+            color: #444;
+            font-size: 12px;
+            padding-top: 50px;
+        }
     </style>
 </head>
 <body>
-    <header>
-        <h1>🛍️ אוצרות מהרשת</h1>
-        <p>כל המציאות של אליאקספרס במקום אחד</p>
-    </header>
 
-    <input type="text" id="searchBar" placeholder="חפש מוצר... (למשל: מנורה, אוזניות)">
+    <div class="logo">🛍️</div>
+    <h1>אוצרות מהרשת</h1>
+    <p class="tagline">המציאות הכי שוות מאליאקספרס</p>
 
-    <div class="links-container" id="linksList">
-        <a href="#" class="link-card" data-name="מנורת שולחן חכמה">מנורת שולחן חכמה 💡</a>
-        <a href="#" class="link-card" data-name="אוזניות בלוטוס אלחוטיות">אוזניות בלוטוס אלחוטיות 🎧</a>
-        <a href="#" class="link-card" data-name="מטען מהיר לרכב">מטען מהיר לרכב 🔌</a>
-        <a href="#" class="link-card" data-name="שעון חכם ספורטיבי">שעון חכם ספורטיבי ⌚</a>
+    <div class="nav-container">
+        <a href="deals.html" class="btn btn-gold">
+            <span>🔥</span> לכל המבצעים והמוצרים
+        </a>
+
+        <a href="https://chat.whatsapp.com/GaRKX7NOUUWA1r4dg6Dtf3" target="_blank" class="btn btn-whatsapp">
+            <span>💬</span> קבוצת העדכונים בוואטסאפ
+        </a>
+
+        <a href="https://www.tiktok.com/@somyc4u" target="_blank" class="btn btn-tiktok">
+            <span>🎵</span> ערוץ הטיקטוק הרשמי
+        </a>
     </div>
 
-    <div id="noResults" class="no-results">לא נמצאו מוצרים תואמים...</div>
+    <div class="footer">
+        &copy; 2026 אוצרות מהרשת | somyc4u
+    </div>
 
-    <script>
-        const searchBar = document.getElementById('searchBar');
-        const linksList = document.getElementById('linksList');
-        const links = linksList.getElementsByClassName('link-card');
-        const noResults = document.getElementById('noResults');
-
-        searchBar.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            let hasResults = false;
-            Array.from(links).forEach((link) => {
-                const name = link.getAttribute('data-name').toLowerCase();
-                if (name.includes(term)) {
-                    link.style.display = 'block';
-                    hasResults = true;
-                } else {
-                    link.style.display = 'none';
-                }
-            });
-            noResults.style.display = hasResults ? 'none' : 'block';
-        });
-    </script>
 </body>
 </html>
