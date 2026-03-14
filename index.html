@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>אוצרות מהרשת</title>
+    <style>
+        :root {
+            --primary-color: #FFD700;
+            --bg-color: #000000;
+            --card-bg: #1A1A1A;
+            --text-color: #ffffff;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        header { text-align: center; margin-bottom: 20px; }
+        #searchBar {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px;
+            border: 2px solid #333;
+            border-radius: 25px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            background: #222;
+            color: white;
+            outline: none;
+            text-align: center;
+        }
+        #searchBar:focus { border-color: var(--primary-color); }
+        .links-container { width: 100%; max-width: 400px; }
+        .link-card {
+            background: var(--card-bg);
+            margin-bottom: 12px;
+            padding: 18px;
+            border-radius: 12px;
+            display: block;
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: bold;
+            transition: 0.3s;
+            text-align: center;
+            border: 1px solid #333;
+        }
+        .link-card:active { transform: scale(0.98); }
+        .no-results { display: none; color: #888; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🛍️ אוצרות מהרשת</h1>
+        <p>כל המציאות של אליאקספרס במקום אחד</p>
+    </header>
+
+    <input type="text" id="searchBar" placeholder="חפש מוצר... (למשל: מנורה, אוזניות)">
+
+    <div class="links-container" id="linksList">
+        <a href="#" class="link-card" data-name="מנורת שולחן חכמה">מנורת שולחן חכמה 💡</a>
+        <a href="#" class="link-card" data-name="אוזניות בלוטוס אלחוטיות">אוזניות בלוטוס אלחוטיות 🎧</a>
+        <a href="#" class="link-card" data-name="מטען מהיר לרכב">מטען מהיר לרכב 🔌</a>
+        <a href="#" class="link-card" data-name="שעון חכם ספורטיבי">שעון חכם ספורטיבי ⌚</a>
+    </div>
+
+    <div id="noResults" class="no-results">לא נמצאו מוצרים תואמים...</div>
+
+    <script>
+        const searchBar = document.getElementById('searchBar');
+        const linksList = document.getElementById('linksList');
+        const links = linksList.getElementsByClassName('link-card');
+        const noResults = document.getElementById('noResults');
+
+        searchBar.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            let hasResults = false;
+            Array.from(links).forEach((link) => {
+                const name = link.getAttribute('data-name').toLowerCase();
+                if (name.includes(term)) {
+                    link.style.display = 'block';
+                    hasResults = true;
+                } else {
+                    link.style.display = 'none';
+                }
+            });
+            noResults.style.display = hasResults ? 'none' : 'block';
+        });
+    </script>
+</body>
+</html>
