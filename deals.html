@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>אוצרות מהרשת - המבצעים</title>
+    <style>
+        body { background-color: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        h1 { color: #FFD700; }
+        #searchBar { width: 100%; max-width: 400px; padding: 12px; border-radius: 25px; border: none; margin-bottom: 20px; text-align: center; }
+        .container { width: 100%; max-width: 500px; display: grid; gap: 15px; }
+        .card { background: #1a1a1a; border: 1px solid #333; border-radius: 15px; overflow: hidden; text-decoration: none; color: white; transition: 0.3s; }
+        .card img { width: 100%; height: 200px; object-fit: cover; }
+        .card-info { padding: 15px; text-align: center; font-weight: bold; color: #FFD700; }
+        .card:hover { transform: translateY(-5px); border-color: #FFD700; }
+    </style>
+</head>
+<body>
+    <h1>🛍️ המבצעים החמים</h1>
+    <input type="text" id="searchBar" placeholder="חפש מוצר..." onkeyup="filterDeals()">
+    <div id="dealsContainer" class="container">גוען נתונים...</div>
+
+    <script>
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/1GpZ2pGGM6Lb5MpCTXuW4Op2kJK_RkkNMHUUvyN1vyRQ/gviz/tq?tqx=out:csv';
+
+        async function loadDeals() {
+            const response = await fetch(sheetUrl);
+            const data = await response.text();
+            const rows = data.split('\n').slice(1);
+            const container = document.getElementById('dealsContainer');
+            container.innerHTML = '';
+
+            rows.forEach(row => {
+                const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                if (cols.length >= 3) {
+                    const name = cols[0].replace(/"/g, '');
+                    const link = cols[1].replace(/"/g, '');
+                    const img = cols[2].replace(/"/g, '');
+                    
+                    container.innerHTML += `
+                        <a href="${link}" class="card" data-name="${name.toLowerCase()}">
+                            <img src="${img}" alt="${name}">
+                            <div class="card-info">${name}</div>
+                        </a>`;
+                }
+            });
+        }
+
+        function filterDeals() {
+            const term = document.getElementById('searchBar').value.toLowerCase();
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.style.display = card.getAttribute('data-name').includes(term) ? 'block' : 'none';
+            });
+        }
+
+        loadDeals();
+    </script>
+</body>
+</html>
