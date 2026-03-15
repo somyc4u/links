@@ -11,7 +11,6 @@
         
         #searchBar { width: 90%; max-width: 400px; padding: 12px; border-radius: 25px; border: 1px solid #333; margin-bottom: 15px; text-align: center; background: #111; color: white; outline: none; }
         
-        /* עיצוב קטגוריות */
         .categories { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 25px; max-width: 500px; }
         .cat-btn { background: #222; color: #fff; border: 1px solid #444; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 14px; transition: 0.3s; }
         .cat-btn.active { background: var(--gold); color: #000; border-color: var(--gold); font-weight: bold; }
@@ -22,7 +21,6 @@
         .card img { width: 100%; height: 140px; object-fit: cover; }
         .card-info { padding: 10px; text-align: center; font-size: 0.9em; font-weight: bold; color: var(--gold); flex-grow: 1; display: flex; align-items: center; justify-content: center; }
         
-        /* סטטוס HOT */
         .hot-tag { position: absolute; top: 5px; right: 5px; background: red; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; z-index: 10; animation: pulse 1.5s infinite; }
         .card.hot-border { border: 1px solid var(--gold); box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
 
@@ -45,33 +43,39 @@
         let allData = [];
 
         async function loadDeals() {
-            const response = await fetch(sheetUrl);
-            const data = await response.text();
-            const rows = data.split('\n').slice(1);
-            const container = document.getElementById('dealsContainer');
-            const catMenu = document.getElementById('catMenu');
-            const categories = new Set();
-            
-            allData = rows.map(row => {
-                const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                if (cols.length >= 3) {
-                    const item = {
-                        name: cols[0].replace(/"/g, '').trim(),
-                        link: cols[1].replace(/"/g, '').trim(),
-                        img: cols[2].replace(/"/g, '').trim(),
-                        cat: (cols[3] || 'כללי').replace(/"/g, '').trim(),
-                        status: (cols[4] || '').replace(/"/g, '').trim()
-                    };
-                    if (item.cat) categories.add(item.cat);
-                    return item;
-                }
-            }).filter(Boolean);
+            try {
+                const response = await fetch(sheetUrl);
+                const data = await response.text();
+                const rows = data.split('\n').slice(1);
+                const catMenu = document.getElementById('catMenu');
+                const categories = new Set();
+                
+                let loadedItems = rows.map(row => {
+                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    if (cols.length >= 3) {
+                        const item = {
+                            name: cols[0].replace(/"/g, '').trim(),
+                            link: cols[1].replace(/"/g, '').trim(),
+                            img: cols[2].replace(/"/g, '').trim(),
+                            cat: (cols[3] || 'כללי').replace(/"/g, '').trim(),
+                            status: (cols[4] || '').replace(/"/g, '').trim()
+                        };
+                        if (item.cat) categories.add(item.cat);
+                        return item;
+                    }
+                }).filter(Boolean);
 
-            categories.forEach(c => {
-                catMenu.innerHTML += `<button class="cat-btn" onclick="filterCat('${c}', this)">${c}</button>`;
-            });
+                // כאן הקסם: הופכים את הסדר כדי שהחדש יהיה למעלה
+                allData = loadedItems.reverse();
 
-            renderItems(allData);
+                categories.forEach(c => {
+                    catMenu.innerHTML += `<button class="cat-btn" onclick="filterCat('${c}', this)">${c}</button>`;
+                });
+
+                renderItems(allData);
+            } catch (error) {
+                document.getElementById('dealsContainer').innerHTML = 'שגיאה בטעינת הנתונים...';
+            }
         }
 
         function renderItems(items) {
