@@ -12,37 +12,40 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 50px 20px;
             margin: 0;
+            padding: 0;
             min-height: 100vh;
         }
 
-        /* עיצוב האייקון - גדול ובולט */
-        .logo-container {
-            margin-bottom: 20px;
-            text-align: center;
+        /* הבאנר החדש - בומבסטי לכל הרוחב */
+        .header-banner {
+            width: 100%;
+            background-color: #000;
+            line-height: 0; /* מונע רווח לבן קטן מתחת לתמונה */
         }
-        .logo-img {
-            max-width: 250px; /* הגדלה דרמטית של האייקון */
+        .banner-img {
+            width: 100%;
             height: auto;
             display: block;
-            margin: 0 auto;
         }
 
-        /* הכיתוב הראשי - מתחת לאייקון */
-        h1 {
-            color: #FFD700;
-            margin: 0;
-            font-size: 32px; /* גופן גדול וברור */
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: bold;
+        .content-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 20px 50px 20px;
+            box-sizing: border-box;
         }
+
         .tagline {
-            color: #aaa;
+            color: #FFD700;
             margin-bottom: 40px;
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
         }
+
         .nav-container {
             width: 100%;
             max-width: 380px;
@@ -66,56 +69,30 @@
             box-sizing: border-box;
             border: 1px solid transparent;
         }
-        .btn-gold {
-            background: linear-gradient(45deg, #FFD700, #B8860B);
-            color: #000;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
-        }
-        .btn-whatsapp {
-            background-color: transparent;
-            border-color: #25D366;
-            color: #25D366;
-        }
-        .btn-tiktok {
-            background-color: transparent;
-            border-color: #fff;
-            color: #fff;
-        }
-        .btn:hover {
-            transform: scale(1.03);
-            opacity: 0.9;
-        }
-        .footer {
-            margin-top: auto;
-            color: #444;
-            font-size: 12px;
-            padding-top: 50px;
-        }
+        .btn-gold { background: linear-gradient(45deg, #FFD700, #B8860B); color: #000; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3); }
+        .btn-whatsapp { border-color: #25D366; color: #25D366; }
+        .btn-tiktok { border-color: #fff; color: #fff; }
+        .btn:hover { transform: scale(1.03); }
+
+        .footer { margin-top: auto; color: #444; font-size: 12px; padding: 30px 0; }
     </style>
 </head>
 <body>
 
-    <div class="logo-container">
-        <img src="logo.png" alt="אוצרות מהרשת" class="logo-img">
+    <div class="header-banner">
+        <img src="banner.png" alt="אוצרות מהרשת" class="banner-img">
     </div>
 
-    <h1>אוצרות מהרשת ✨️🔥</h1>
-    <p class="tagline">המציאות הכי שוות מאליאקספרס</p>
+    <div class="content-container">
+        <p class="tagline">המציאות הכי שוות מאליאקספרס ✨</p>
 
-    <div class="nav-container">
-        <a href="deals.html" class="btn btn-gold">
-            <span>🔥</span> לכל המבצעים והמוצרים
-        </a>
-        <a href="https://chat.whatsapp.com/GaRKX7NOUUWA1r4dg6Dtf3" target="_blank" class="btn btn-whatsapp">
-            <span>💬</span> קבוצת העדכונים בוואטסאפ
-        </a>
-        <a href="https://www.tiktok.com/@somyc4u" target="_blank" class="btn btn-tiktok">
-            <span>🎵</span> ערוץ הטיקטוק הרשמי
-        </a>
-    </div>
+        <div class="nav-container">
+            <a href="deals.html" class="btn btn-gold"><span>🔥</span> לכל המבצעים והמוצרים</a>
+            <a href="https://chat.whatsapp.com/GaRKX7NOUUWA1r4dg6Dtf3" target="_blank" class="btn btn-whatsapp"><span>💬</span> קבוצת העדכונים בוואטסאפ</a>
+            <a href="https://www.tiktok.com/@somyc4u" target="_blank" class="btn btn-tiktok"><span>🎵</span> ערוץ הטיקטוק הרשמי</a>
+        </div>
 
-    <div class="footer">
-        &copy; 2026 אוצרות מהרשת | somyc4u
+        <div class="footer">&copy; 2026 אוצרות מהרשת | somyc4u</div>
     </div>
 
 </body>
