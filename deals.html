@@ -3,37 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>אוצרות מהרשת - עמוד המבצעים</title>
+    <title>אוצרות מהרשת - המבצעים</title>
     <style>
         :root { --gold: #FFD700; --bg: #000; --card: #1a1a1a; }
         body { background-color: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-
+        
         .header-banner { width: 100%; background-color: #000; line-height: 0; }
         .banner-img { width: 100%; height: auto; display: block; }
 
         .content-container { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; }
-
+        
         #searchBar { width: 90%; max-width: 400px; padding: 12px; border-radius: 25px; border: 1px solid #333; margin-bottom: 15px; text-align: center; background: #111; color: white; outline: none; }
-
+        
         .categories { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 25px; }
-        .cat-btn { background: #222; color: #fff; border: 1px solid #444; padding: 5px 15px; border-radius: 20px; cursor: pointer; transition: 0.3s; }
+        .cat-btn { background: #222; color: #fff; border: 1px solid #444; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 14px; transition: 0.3s; }
         .cat-btn.active { background: var(--gold); color: #000; font-weight: bold; border-color: var(--gold); }
 
-        .deals-container { width: 100%; max-width: 450px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-
+        .container { width: 100%; max-width: 450px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .card { background: var(--card); border: 1px solid #333; border-radius: 12px; overflow: hidden; text-decoration: none; color: white; position: relative; display: flex; flex-direction: column; }
-        .img-wrapper { position: relative; width: 100%; height: 160px; }
+        .img-wrapper { position: relative; width: 100%; height: 140px; }
         .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-
         .item-number { position: absolute; bottom: 5px; left: 5px; background: rgba(0, 0, 0, 0.7); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
         .card-info { padding: 10px; text-align: center; font-weight: bold; color: var(--gold); font-size: 0.9em; flex-grow: 1; display: flex; align-items: center; justify-content: center; }
-
+        
         .hot-tag { position: absolute; top: 5px; right: 5px; background: red; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; z-index: 10; }
-        .hot-border { border: 1px solid var(--gold); }
+        .card.hot-border { border: 1px solid var(--gold); }
 
-        #loadMoreBtn { margin: 30px 0; padding: 12px 30px; background: var(--gold); color: #000; font-weight: bold; border: none; cursor: pointer; display: none; border-radius: 25px; }
-
-        #backToTop { position: fixed; bottom: 20px; right: 20px; background: var(--gold); color: #000; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; border: none; cursor: pointer; opacity: 0; visibility: hidden; transition: 0.3s; z-index: 100; }
+        #loadMoreBtn { margin: 30px 0; padding: 12px 30px; background: var(--gold); color: #000; border-radius: 25px; font-weight: bold; border: none; cursor: pointer; display: none; }
+        #backToTop { position: fixed; bottom: 20px; right: 20px; background: var(--gold); color: #000; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; opacity: 0; visibility: hidden; transition: 0.4s; z-index: 1000; border: none; }
         #backToTop.show { opacity: 1; visibility: visible; }
     </style>
 </head>
@@ -45,21 +42,17 @@
 
     <div class="content-container">
         <input type="text" id="searchBar" placeholder="חפש מוצר..." onkeyup="filterItems()">
-
         <div class="categories" id="catMenu">
-            <button class="cat-btn active" onclick="filterCat('all', this)">הכל</button>
+            <button class="cat-btn active" id="btn-all" onclick="filterCat('all', this)">הכל</button>
         </div>
-
-        <div id="dealsContainer" class="deals-container">טוען מבצעים...</div>
-
-        <button id="loadMoreBtn" onclick="showMore()">הראי לי עוד...</button>
+        <div id="dealsContainer" class="container">טוען אוצרות...</div>
+        <button id="loadMoreBtn" onclick="showMore()">טען עוד מוצרים...</button>
     </div>
 
-    <button id="backToTop" onclick="scrollToTop()">^</button>
+    <button id="backToTop" onclick="scrollToTop()">↑</button>
 
     <script>
-        const sheetUrl = "https://docs.google.com/spreadsheets/d/1GpZ2pGGM6Lb5MpCTXuW4Op2kJK_RkkNMHUUvyN1vyRQ/gviz/tq?tqx=out:csv";
-        
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/1GpZ2pGGM6Lb5MpCTXuW4Op2kJK_RkkNMHUUvyN1vyRQ/gviz/tq?tqx=out:csv';
         let allData = [];
         let filteredData = [];
         let visibleCount = 12;
@@ -71,35 +64,34 @@
                 const rows = data.split('\n').slice(1);
                 const catMenu = document.getElementById('catMenu');
                 const categories = new Set();
-
+                
                 let loadedItems = rows.map((row, index) => {
                     const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                    const cat = (cols[3] || '').replace(/"/g, '').trim();
-                    if (cat) categories.add(cat);
-
-                    return {
-                        id: index + 2,
-                        name: (cols[0] || '').replace(/"/g, '').trim(),
-                        link: (cols[1] || '').replace(/"/g, '').trim(),
-                        img: (cols[2] || '').replace(/"/g, '').trim(),
-                        cat: cat,
-                        status: (cols[4] || '').replace(/"/g, '').trim()
-                    };
+                    if (cols.length >= 3) {
+                        const cat = (cols[3] || 'כללי').replace(/"/g, '').trim();
+                        if (cat) categories.add(cat);
+                        return {
+                            id: index + 2,
+                            name: cols[0].replace(/"/g, '').trim(),
+                            link: cols[1].replace(/"/g, '').trim(),
+                            img: cols[2].replace(/"/g, '').trim(),
+                            cat: cat,
+                            status: (cols[4] || '').replace(/"/g, '').trim()
+                        };
+                    }
                 }).filter(Boolean);
 
                 allData = loadedItems.reverse();
-                filteredData = [...allData];
+                filteredData = allData;
 
                 const sortedCats = [...categories].sort();
-                
-                // הנה הקוד המקורי שיצר את הכפתורים כמו פעם!
                 sortedCats.forEach(c => {
                     catMenu.innerHTML += `<button class="cat-btn" onclick="filterCat('${c}', this)">${c}</button>`;
                 });
 
                 renderItems();
             } catch (error) {
-                document.getElementById('dealsContainer').innerHTML = '<p>שגיאה בטעינת הנתונים...</p>';
+                document.getElementById('dealsContainer').innerHTML = 'שגיאה בטעינת הנתונים...';
             }
         }
 
@@ -107,25 +99,22 @@
             const container = document.getElementById('dealsContainer');
             const loadMoreBtn = document.getElementById('loadMoreBtn');
             const itemsToShow = filteredData.slice(0, visibleCount);
-
-            container.innerHTML = itemsToShow.map(item => 
-                `<a href="${item.link}" target="_blank" class="card ${item.status === 'HOT' ? 'hot-border' : ''}">
+            
+            container.innerHTML = itemsToShow.map(item => `
+                <a href="${item.link}" target="_blank" class="card ${item.status === 'HOT' ? 'hot-border' : ''}">
                     ${item.status === 'HOT' ? '<div class="hot-tag">🔥 HOT</div>' : ''}
                     <div class="img-wrapper">
                         <img src="${item.img}" alt="${item.name}">
                         <div class="item-number">${item.id}</div>
                     </div>
                     <div class="card-info">${item.name}</div>
-                </a>`
-            ).join('');
+                </a>
+            `).join('');
 
             loadMoreBtn.style.display = (visibleCount < filteredData.length) ? 'block' : 'none';
         }
 
-        function showMore() {
-            visibleCount += 12;
-            renderItems();
-        }
+        function showMore() { visibleCount += 12; renderItems(); }
 
         function filterItems() {
             const term = document.getElementById('searchBar').value.toLowerCase();
@@ -137,24 +126,18 @@
         function filterCat(cat, btn) {
             document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-
-            filteredData = (cat === 'all') ? [...allData] : allData.filter(i => i.cat === cat);
+            filteredData = (cat === 'all') ? allData : allData.filter(i => i.cat === cat);
             visibleCount = 12;
             renderItems();
         }
 
         window.onscroll = function() {
-            const btn = document.getElementById('backToTop');
-            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-                btn.classList.add('show');
-            } else {
-                btn.classList.remove('show');
-            }
+            const btn = document.getElementById("backToTop");
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) { btn.classList.add("show"); } 
+            else { btn.classList.remove("show"); }
         };
 
-        function scrollToTop() {
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        }
+        function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
         loadDeals();
     </script>
