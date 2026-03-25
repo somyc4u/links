@@ -58,8 +58,7 @@
     <button id="backToTop" onclick="scrollToTop()">^</button>
 
     <script>
-        // שימי, כאן בדיוק צריך להכניס את הקישור האמיתי שלך בין המרכאות!
-        const sheetUrl = "הדבק_כאן_את_הקישור_המקורי_שלך_מגוגל_שיטס";
+        const sheetUrl = "https://docs.google.com/spreadsheets/d/1q2pZGbMULbG8kPctu4WOq2kJK_RkkNNBHXRYntyBQ/gviz/tq?tqx=out:csv";
         
         let allData = [];
         let filteredData = [];
@@ -93,7 +92,6 @@
 
                 const sortedCats = [...categories].sort();
                 
-                // התיקון המושלם: יצירת כפתורים בלי להסתבך עם מרכאות וגרשיים! (חסין ל"גאדג'טים")
                 sortedCats.forEach(c => {
                     const btn = document.createElement('button');
                     btn.className = 'cat-btn';
