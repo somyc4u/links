@@ -58,7 +58,6 @@
     <button id="backToTop" onclick="scrollToTop()">^</button>
 
     <script>
-        // הנה הקישור המדויק שלך, מומר לפורמט שמושך את הנתונים!
         const sheetUrl = "https://docs.google.com/spreadsheets/d/1GpZ2pGGM6Lb5MpCTXuW4Op2kJK_RkkNMHUUvyN1vyRQ/gviz/tq?tqx=out:csv";
         
         let allData = [];
@@ -93,7 +92,7 @@
 
                 const sortedCats = [...categories].sort();
                 
-                // התיקון שהופך את הכפתורים לחסינים לגרשיים:
+                // הנה התיקון שמונע מהגרש לשבור את הכפתור!
                 sortedCats.forEach(c => {
                     const btn = document.createElement('button');
                     btn.className = 'cat-btn';
@@ -104,7 +103,7 @@
 
                 renderItems();
             } catch (error) {
-                document.getElementById('dealsContainer').innerHTML = '<p>שגיאה בטעינת הנתונים... אנא ודא שהקובץ מוגדר כפתוח לצפייה לכולם.</p>';
+                document.getElementById('dealsContainer').innerHTML = '<p>שגיאה בטעינת הנתונים...</p>';
             }
         }
 
