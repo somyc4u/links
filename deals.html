@@ -47,7 +47,7 @@
         <input type="text" id="searchBar" placeholder="חפש מוצר..." onkeyup="filterItems()">
 
         <div class="categories" id="catMenu">
-            <button class="cat-btn active" data-cat="all">הכל</button>
+            <button class="cat-btn active" onclick="filterCat('all', this)">הכל</button>
         </div>
 
         <div id="dealsContainer" class="deals-container">טוען מבצעים...</div>
@@ -92,21 +92,9 @@
 
                 const sortedCats = [...categories].sort();
                 
-                // יצירת הכפתורים בשיטה חדשה וחסינה לחלוטין
+                // הנה הקוד המקורי שיצר את הכפתורים כמו פעם!
                 sortedCats.forEach(c => {
-                    const btn = document.createElement('button');
-                    btn.className = 'cat-btn';
-                    btn.textContent = c;
-                    btn.dataset.cat = c; // שומרים את השם מאחורי הקלעים
-                    catMenu.appendChild(btn);
-                });
-
-                // ניהול הלחיצות בצורה מרוכזת (אפס תקלות עם גרשיים)
-                catMenu.addEventListener('click', function(e) {
-                    if(e.target.classList.contains('cat-btn')) {
-                        const cat = e.target.dataset.cat;
-                        filterCat(cat, e.target);
-                    }
+                    catMenu.innerHTML += `<button class="cat-btn" onclick="filterCat('${c}', this)">${c}</button>`;
                 });
 
                 renderItems();
