@@ -10,8 +10,8 @@
 
     <meta property="og:title" content="אוצרות מהרשת - עמוד המבצעים 🔥">
     <meta property="og:description" content="כנסו לראות את הדילים והגאדג'טים הכי שווים שמצאנו עבורכם באליאקספרס. קליק אחד ואתם בפנים!">
-    <meta property="og:image" content="https://somyc4u.github.io/banner.png">
-    <meta property="og:url" content="https://somyc4u.github.io/deals.html">
+    <meta property="og:image" content="https://somyc4u.github.io/links/banner.png">
+    <meta property="og:url" content="https://somyc4u.github.io/links/deals.html">
     <meta property="og:type" content="website">
 
     <title>אוצרות מהרשת - עמוד המבצעים</title>
@@ -20,7 +20,6 @@
         :root { --gold: #FFD700; --bg: #000; --card: #1a1a1a; }
         body { background-color: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
 
-        /* התיקון של הלוגו - הגבלת רוחב כדי שלא יימתח במסך מחשב */
         .header-banner { width: 100%; max-width: 480px; margin: 0 auto; background-color: #000; line-height: 0; }
         .banner-img { width: 100%; height: auto; display: block; }
 
@@ -105,7 +104,6 @@
 
                 const sortedCats = [...categories].sort();
                 
-                // יצירת הכפתורים בשיטה החכמה והחסינה לגרשיים:
                 sortedCats.forEach(c => {
                     const btn = document.createElement('button');
                     btn.className = 'cat-btn';
