@@ -8,7 +8,7 @@
         :root { --gold: #FFD700; --bg: #000; --card: #1a1a1a; }
         body { background-color: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
 
-        /* כאן הוספתי את ההגבלה לבאנר כדי שייראה כמו אפליקציה בכל מסך */
+        /* התיקון של הלוגו - הגבלת רוחב כדי שלא יימתח במסך מחשב */
         .header-banner { width: 100%; max-width: 480px; margin: 0 auto; background-color: #000; line-height: 0; }
         .banner-img { width: 100%; height: auto; display: block; }
 
@@ -93,8 +93,13 @@
 
                 const sortedCats = [...categories].sort();
                 
+                // יצירת הכפתורים בשיטה החכמה והחסינה לגרשיים:
                 sortedCats.forEach(c => {
-                    catMenu.innerHTML += `<button class="cat-btn" onclick="filterCat('${c}', this)">${c}</button>`;
+                    const btn = document.createElement('button');
+                    btn.className = 'cat-btn';
+                    btn.textContent = c;
+                    btn.onclick = function() { filterCat(c, this); };
+                    catMenu.appendChild(btn);
                 });
 
                 renderItems();
