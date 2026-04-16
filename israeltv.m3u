@@ -1,0 +1,14 @@
+#EXTM3U
+
+#EXTINF:-1 tvg-id="" tvg-logo="https://upload.wikimedia.org/wikipedia/he/2/23/Kan_11_logo.svg" group-title="Israel", Kan 11
+https://kan11.media.kan.org.il/hls/live/2024514/2024514/master.m3u8
+
+#EXTINF:-1 tvg-id="" tvg-logo="https://upload.wikimedia.org/wikipedia/he/thumb/4/47/Knesset_tv_2021.svg/512px-Knesset_tv_2021.svg.png" group-title="Israel", Knesset Channel
+https://knesset.gcdn.co/knesset_tv/smil:knesset_tv.smil/playlist.m3u8
+
+#EXTINF:-1 tvg-id="" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/4/42/I24NEWS_logo.png" group-title="Israel", i24News English
+https://bcovlive-a.akamaihd.net/0547161b369d4bd4b1ff3510e14a2f8d/eu-central-1/6407024883001/playlist.m3u8
+
+#EXTINF:-1 tvg-id="" tvg-logo="https://upload.wikimedia.org/wikipedia/he/thumb/b/be/Now14_logo.svg/512px-Now14_logo.svg.png" group-title="Israel", Channel 14
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://live.ch20-cdnwiz.com/ch20-abr/ch20-abr/playlist.m3u8
