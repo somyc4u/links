@@ -8,13 +8,12 @@
         body { 
             background-color: #000; color: #fff; font-family: system-ui, -apple-system, sans-serif; 
             margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; 
-            user-select: none; -webkit-user-select: none;
         }
         h1 { color: #ffff00; font-size: 26px; margin: 20px 0; border-bottom: 3px solid #ffff00; padding-bottom: 5px; }
         
         .links-grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); 
+            grid-template-columns: repeat(auto-fit, minmax(75px, 1fr)); 
             gap: 15px; width: 100%; max-width: 500px; 
         }
         
@@ -24,160 +23,64 @@
             transition: all 0.2s; -webkit-tap-highlight-color: transparent;
         }
 
-        .link-item:active { border-color: #ffff00; background-color: #222; transform: scale(0.95); }
+        .link-item:active { border-color: #ffff00; transform: scale(0.95); }
 
         .link-item img { width: 48px; height: 48px; border-radius: 10px; margin-bottom: 8px; background: #fff; padding: 2px; }
         .link-item span { 
             color: #ffff00; font-size: 13px; font-weight: bold; text-align: center; 
             line-height: 1.2; word-wrap: break-word; width: 100%;
         }
-
-        #contextMenu {
-            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #111; border: 3px solid #ffff00; border-radius: 20px; padding: 25px;
-            z-index: 1000; width: 85%; max-width: 320px; box-shadow: 0 0 30px rgba(255,255,0,0.3);
-        }
-        .menu-btn { width: 100%; padding: 18px; margin: 10px 0; border-radius: 12px; border: none; font-weight: bold; font-size: 20px; }
-        .btn-edit { background: #ffff00; color: #000; }
-        .btn-delete { background: #ff4444; color: #fff; }
-        .btn-cancel { background: #444; color: #fff; }
-
-        .admin-panel { margin-top: 40px; background-color: #080808; padding: 20px; border-radius: 15px; border: 1px dashed #ffff00; width: 95%; max-width: 400px; box-sizing: border-box; }
-        input { width: 100%; padding: 15px; margin-bottom: 12px; background: #1a1a1a; border: 1px solid #ffff00; color: #fff; border-radius: 10px; box-sizing: border-box; font-size: 18px; }
-        button.add-btn { width: 100%; padding: 15px; background-color: #ffff00; color: #000; font-weight: bold; border: none; border-radius: 10px; font-size: 20px; }
         
-        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 999; }
+        .loading { color: #ffff00; font-style: italic; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <h1>הקישורים שלי</h1>
-
+    <div id="loading" class="loading">טוען קישורים מהאקסל...</div>
     <div id="linksContainer" class="links-grid"></div>
 
-    <div class="admin-panel">
-        <input type="text" id="nameInput" placeholder="שם האתר">
-        <input type="text" id="urlInput" placeholder="כתובת (https://...)">
-        <button class="add-btn" onclick="addNewLink()">הוסף למסך</button>
-    </div>
-
-    <div id="overlay" onclick="closeMenu()"></div>
-    <div id="contextMenu">
-        <h3 style="color:#ffff00; text-align:center; margin-top:0; font-size:22px;">ניהול קישור</h3>
-        <button class="menu-btn btn-edit" onclick="editCurrent()">עריכה</button>
-        <button class="menu-btn btn-delete" onclick="deleteCurrent()">מחיקה</button>
-        <button class="menu-btn btn-cancel" onclick="closeMenu()">ביטול</button>
-    </div>
-
     <script>
-        let longPressTimer;
-        let currentTargetIndex = null;
-
-        // רשימה קבועה ששמורה בשרת GitHub - לא תימחק לעולם!
-        const hardcodedLinks = [
-            {name:'Google', url:'https://google.com'},
-            {name:'YouTube', url:'https://youtube.com'},
-            {name:'אוצרות מהרשת', url:'https://somyc4u.github.io/links/'},
-            {name:'GitHub Pages', url:'https://github.com/'},
-            {name:'AliExpress Portals', url:'https://portals.aliexpress.com'},
-            {name:'Facebook', url:'https://www.facebook.com'},
-            {name:'TikTok Downloader', url:'https://snaptik.app'},
-            {name:'X', url:'https://www.x.com'},
-            {name:'HotelsCombined', url:'https://www.hotelscombined.co.il'},
-            {name:'MyGov', url:'https://login.gov.il'},
-            {name:'מערכת ההזדהות', url:'https://login.gov.il'},
-            {name:'מקצר קישורים', url:'https://is.gd'},
-            {name:'טבע בריא', url:'https://www.teva-briut.co.il'},
-            {name:'OpenAI TTS', url:'https://openai.fm'},
-            {name:'טלוויזיה', url:'https://israelitv.pages.dev/'}
-        ];
+        // להדביק כאן את הקישור שקיבלת מ-"פרסום באינטרנט" (CSV)
+        const SHEET_CSV_URL = 'כאן_להדביק_את_הקישור_שלך';
 
         function getIcon(url) {
             try { return `https://www.google.com/s2/favicons?sz=128&domain=${new URL(url).hostname}`; }
             catch (e) { return 'https://via.placeholder.com/128/333/ffff00?text=S'; }
         }
 
-        function renderLinks() {
-            const container = document.getElementById('linksContainer');
-            // טעינת קישורים נוספים מהזיכרון המקומי (אם יש כאלו שהוספת מהנייד)
-            let userLinks = JSON.parse(localStorage.getItem('shimiLinks')) || [];
-            
-            // איחוד הרשימה הקבועה עם הרשימה של המשתמש
-            let allLinks = [...hardcodedLinks, ...userLinks];
-            
-            container.innerHTML = '';
-            allLinks.forEach((item, index) => {
-                const a = document.createElement('a');
-                a.href = item.url;
-                a.className = 'link-item';
-                a.innerHTML = `<img src="${getIcon(item.url)}"><span>${item.name}</span>`;
+        async function fetchLinks() {
+            try {
+                const response = await fetch(SHEET_CSV_URL);
+                const data = await response.text();
+                const rows = data.split('\n').slice(1); // דילוג על כותרות
                 
-                a.addEventListener('touchstart', (e) => {
-                    longPressTimer = setTimeout(() => {
-                        e.preventDefault();
-                        showMenu(index);
-                    }, 700);
-                }, {passive: false});
+                const container = document.getElementById('linksContainer');
+                document.getElementById('loading').style.display = 'none';
+                container.innerHTML = '';
 
-                a.addEventListener('touchend', () => clearTimeout(longPressTimer));
-                a.addEventListener('contextmenu', (e) => e.preventDefault());
-
-                container.appendChild(a);
-            });
-        }
-
-        function showMenu(index) {
-            // מאפשרים מחיקה/עריכה רק לקישורים שהמשתמש הוסיף (לא הקבועים מהקוד)
-            if (index < hardcodedLinks.length) {
-                alert("זהו קישור קבוע מהשרת. כדי לשנות אותו יש לעדכן את הקוד ב-GitHub.");
-                return;
+                rows.forEach(row => {
+                    const columns = row.split(',');
+                    if (columns.length >= 2) {
+                        const name = columns[0].trim();
+                        const url = columns[1].trim();
+                        
+                        if (name && url) {
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.className = 'link-item';
+                            a.innerHTML = `<img src="${getIcon(url)}"><span>${name}</span>`;
+                            container.appendChild(a);
+                        }
+                    }
+                });
+            } catch (error) {
+                document.getElementById('loading').innerText = 'שגיאה בטעינת הנתונים';
+                console.error(error);
             }
-            currentTargetIndex = index - hardcodedLinks.length;
-            document.getElementById('overlay').style.display = 'block';
-            document.getElementById('contextMenu').style.display = 'block';
         }
 
-        function closeMenu() {
-            document.getElementById('overlay').style.display = 'none';
-            document.getElementById('contextMenu').style.display = 'none';
-            currentTargetIndex = null;
-        }
-
-        function deleteCurrent() {
-            let links = JSON.parse(localStorage.getItem('shimiLinks'));
-            links.splice(currentTargetIndex, 1);
-            localStorage.setItem('shimiLinks', JSON.stringify(links));
-            closeMenu();
-            renderLinks();
-        }
-
-        function editCurrent() {
-            let links = JSON.parse(localStorage.getItem('shimiLinks'));
-            let item = links[currentTargetIndex];
-            let newName = prompt("שם חדש:", item.name);
-            let newUrl = prompt("כתובת חדשה:", item.url);
-            if(newName && newUrl) {
-                links[currentTargetIndex] = {name: newName, url: newUrl};
-                localStorage.setItem('shimiLinks', JSON.stringify(links));
-            }
-            closeMenu();
-            renderLinks();
-        }
-
-        function addNewLink() {
-            const name = document.getElementById('nameInput').value;
-            let url = document.getElementById('urlInput').value;
-            if (!name || !url) return;
-            if (!url.startsWith('http')) url = 'https://' + url;
-            const links = JSON.parse(localStorage.getItem('shimiLinks')) || [];
-            links.push({name, url});
-            localStorage.setItem('shimiLinks', JSON.stringify(links));
-            document.getElementById('nameInput').value = '';
-            document.getElementById('urlInput').value = '';
-            renderLinks();
-        }
-
-        renderLinks();
+        fetchLinks();
     </script>
 </body>
 </html>
