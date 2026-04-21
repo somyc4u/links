@@ -73,6 +73,25 @@
         let longPressTimer;
         let currentTargetIndex = null;
 
+        // רשימה קבועה ששמורה בשרת GitHub - לא תימחק לעולם!
+        const hardcodedLinks = [
+            {name:'Google', url:'https://google.com'},
+            {name:'YouTube', url:'https://youtube.com'},
+            {name:'אוצרות מהרשת', url:'https://somyc4u.github.io/links/'},
+            {name:'GitHub Pages', url:'https://github.com/'},
+            {name:'AliExpress Portals', url:'https://portals.aliexpress.com'},
+            {name:'Facebook', url:'https://www.facebook.com'},
+            {name:'TikTok Downloader', url:'https://snaptik.app'},
+            {name:'X', url:'https://www.x.com'},
+            {name:'HotelsCombined', url:'https://www.hotelscombined.co.il'},
+            {name:'MyGov', url:'https://login.gov.il'},
+            {name:'מערכת ההזדהות', url:'https://login.gov.il'},
+            {name:'מקצר קישורים', url:'https://is.gd'},
+            {name:'טבע בריא', url:'https://www.teva-briut.co.il'},
+            {name:'OpenAI TTS', url:'https://openai.fm'},
+            {name:'טלוויזיה', url:'https://israelitv.pages.dev/'}
+        ];
+
         function getIcon(url) {
             try { return `https://www.google.com/s2/favicons?sz=128&domain=${new URL(url).hostname}`; }
             catch (e) { return 'https://via.placeholder.com/128/333/ffff00?text=S'; }
@@ -80,11 +99,14 @@
 
         function renderLinks() {
             const container = document.getElementById('linksContainer');
-            let links = JSON.parse(localStorage.getItem('shimiLinks')) || [{name:'Google',url:'https://google.com'},{name:'YouTube',url:'https://youtube.com'}];
-            localStorage.setItem('shimiLinks', JSON.stringify(links));
+            // טעינת קישורים נוספים מהזיכרון המקומי (אם יש כאלו שהוספת מהנייד)
+            let userLinks = JSON.parse(localStorage.getItem('shimiLinks')) || [];
+            
+            // איחוד הרשימה הקבועה עם הרשימה של המשתמש
+            let allLinks = [...hardcodedLinks, ...userLinks];
             
             container.innerHTML = '';
-            links.forEach((item, index) => {
+            allLinks.forEach((item, index) => {
                 const a = document.createElement('a');
                 a.href = item.url;
                 a.className = 'link-item';
@@ -105,7 +127,12 @@
         }
 
         function showMenu(index) {
-            currentTargetIndex = index;
+            // מאפשרים מחיקה/עריכה רק לקישורים שהמשתמש הוסיף (לא הקבועים מהקוד)
+            if (index < hardcodedLinks.length) {
+                alert("זהו קישור קבוע מהשרת. כדי לשנות אותו יש לעדכן את הקוד ב-GitHub.");
+                return;
+            }
+            currentTargetIndex = index - hardcodedLinks.length;
             document.getElementById('overlay').style.display = 'block';
             document.getElementById('contextMenu').style.display = 'block';
         }
