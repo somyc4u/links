@@ -6,30 +6,32 @@
     <title>דף הבית של שימי</title>
     <style>
         body { 
-            background-color: #000; color: #fff; font-family: system-ui, -apple-system, sans-serif; 
-            margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; 
+            background-color: #000; color: #fff; font-family: sans-serif; 
+            margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; 
             user-select: none; -webkit-user-select: none;
         }
-        h1 { color: #ffff00; font-size: 26px; margin: 20px 0; border-bottom: 3px solid #ffff00; padding-bottom: 5px; }
+        h1 { color: #ffff00; font-size: 24px; margin: 15px 0; border-bottom: 2px solid #ffff00; }
         
         .links-grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); 
-            gap: 15px; width: 100%; max-width: 500px; 
+            /* 5 עמודות קבועות בכל מצב */
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 8px; width: 100%; max-width: 600px; 
         }
         
         .link-item { 
             display: flex; flex-direction: column; align-items: center; text-decoration: none; 
-            background-color: #111; border: 2px solid #333; border-radius: 15px; padding: 12px 5px;
+            background-color: #111; border: 2px solid #333; border-radius: 12px; padding: 10px 2px;
             transition: all 0.2s; -webkit-tap-highlight-color: transparent;
+            min-height: 90px; justify-content: flex-start;
         }
 
-        .link-item:active { border-color: #ffff00; background-color: #222; transform: scale(0.95); }
+        .link-item:active { border-color: #ffff00; background-color: #222; }
 
-        .link-item img { width: 48px; height: 48px; border-radius: 10px; margin-bottom: 8px; background: #fff; padding: 2px; }
+        .link-item img { width: 40px; height: 40px; border-radius: 8px; margin-bottom: 6px; background: #fff; padding: 2px; }
         .link-item span { 
-            color: #ffff00; font-size: 13px; font-weight: bold; text-align: center; 
-            line-height: 1.2; word-wrap: break-word; width: 100%;
+            color: #ffff00; font-size: 11px; font-weight: bold; text-align: center; 
+            line-height: 1.1; word-wrap: break-word; width: 100%;
         }
 
         #contextMenu {
@@ -42,9 +44,9 @@
         .btn-delete { background: #ff4444; color: #fff; }
         .btn-cancel { background: #444; color: #fff; }
 
-        .admin-panel { margin-top: 40px; background-color: #080808; padding: 20px; border-radius: 15px; border: 1px dashed #ffff00; width: 95%; max-width: 400px; box-sizing: border-box; }
-        input { width: 100%; padding: 15px; margin-bottom: 12px; background: #1a1a1a; border: 1px solid #ffff00; color: #fff; border-radius: 10px; box-sizing: border-box; font-size: 18px; }
-        button.add-btn { width: 100%; padding: 15px; background-color: #ffff00; color: #000; font-weight: bold; border: none; border-radius: 10px; font-size: 20px; }
+        .admin-panel { margin-top: 30px; background-color: #080808; padding: 15px; border-radius: 15px; border: 1px dashed #ffff00; width: 95%; max-width: 400px; box-sizing: border-box; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; background: #1a1a1a; border: 1px solid #ffff00; color: #fff; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button.add-btn { width: 100%; padding: 15px; background-color: #ffff00; color: #000; font-weight: bold; border: none; border-radius: 10px; font-size: 18px; }
         
         #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 999; }
     </style>
@@ -63,7 +65,7 @@
 
     <div id="overlay" onclick="closeMenu()"></div>
     <div id="contextMenu">
-        <h3 style="color:#ffff00; text-align:center; margin-top:0; font-size:22px;">ניהול קישור</h3>
+        <h3 style="color:#ffff00; text-align:center; margin-top:0; font-size:20px;">אפשרויות</h3>
         <button class="menu-btn btn-edit" onclick="editCurrent()">עריכה</button>
         <button class="menu-btn btn-delete" onclick="deleteCurrent()">מחיקה</button>
         <button class="menu-btn btn-cancel" onclick="closeMenu()">ביטול</button>
