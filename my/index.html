@@ -2,39 +2,51 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>דף הבית של שימי</title>
     <style>
-        body { background-color: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; user-select: none; }
-        h1 { color: #ffff00; font-size: 24px; margin: 15px 0; border-bottom: 2px solid #ffff00; }
+        body { 
+            background-color: #000; color: #fff; font-family: system-ui, -apple-system, sans-serif; 
+            margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; 
+            user-select: none; -webkit-user-select: none;
+        }
+        h1 { color: #ffff00; font-size: 26px; margin: 20px 0; border-bottom: 3px solid #ffff00; padding-bottom: 5px; }
         
-        .links-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; width: 100%; max-width: 600px; }
+        .links-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); 
+            gap: 15px; width: 100%; max-width: 500px; 
+        }
         
         .link-item { 
             display: flex; flex-direction: column; align-items: center; text-decoration: none; 
-            background-color: #111; border: 2px solid #444; border-radius: 12px; padding: 10px 5px;
-            -webkit-tap-highlight-color: transparent;
+            background-color: #111; border: 2px solid #333; border-radius: 15px; padding: 12px 5px;
+            transition: all 0.2s; -webkit-tap-highlight-color: transparent;
         }
 
-        .link-item img { width: 45px; height: 45px; border-radius: 8px; margin-bottom: 5px; background: #fff; pointer-events: none; }
-        .link-item span { color: #ffff00; font-size: 12px; font-weight: bold; text-align: center; pointer-events: none; }
+        .link-item:active { border-color: #ffff00; background-color: #222; transform: scale(0.95); }
 
-        /* תפריט אפשרויות (Modal) */
+        .link-item img { width: 48px; height: 48px; border-radius: 10px; margin-bottom: 8px; background: #fff; padding: 2px; }
+        .link-item span { 
+            color: #ffff00; font-size: 13px; font-weight: bold; text-align: center; 
+            line-height: 1.2; word-wrap: break-word; width: 100%;
+        }
+
         #contextMenu {
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #111; border: 3px solid #ffff00; border-radius: 20px; padding: 20px;
-            z-index: 1000; width: 80%; max-width: 300px; box-shadow: 0 0 20px rgba(255,255,0,0.2);
+            background: #111; border: 3px solid #ffff00; border-radius: 20px; padding: 25px;
+            z-index: 1000; width: 85%; max-width: 320px; box-shadow: 0 0 30px rgba(255,255,0,0.3);
         }
-        .menu-btn { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; font-weight: bold; font-size: 18px; cursor: pointer; }
+        .menu-btn { width: 100%; padding: 18px; margin: 10px 0; border-radius: 12px; border: none; font-weight: bold; font-size: 20px; }
         .btn-edit { background: #ffff00; color: #000; }
         .btn-delete { background: #ff4444; color: #fff; }
         .btn-cancel { background: #444; color: #fff; }
 
-        .admin-panel { margin-top: 30px; background-color: #080808; padding: 15px; border-radius: 12px; border: 1px dashed #ffff00; width: 90%; max-width: 400px; }
-        input { width: 100%; padding: 12px; margin-bottom: 10px; background: #1a1a1a; border: 1px solid #ffff00; color: #fff; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        button.add-btn { width: 100%; padding: 12px; background-color: #ffff00; color: #000; font-weight: bold; border: none; border-radius: 8px; font-size: 18px; }
+        .admin-panel { margin-top: 40px; background-color: #080808; padding: 20px; border-radius: 15px; border: 1px dashed #ffff00; width: 95%; max-width: 400px; box-sizing: border-box; }
+        input { width: 100%; padding: 15px; margin-bottom: 12px; background: #1a1a1a; border: 1px solid #ffff00; color: #fff; border-radius: 10px; box-sizing: border-box; font-size: 18px; }
+        button.add-btn { width: 100%; padding: 15px; background-color: #ffff00; color: #000; font-weight: bold; border: none; border-radius: 10px; font-size: 20px; }
         
-        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; }
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 999; }
     </style>
 </head>
 <body>
@@ -49,9 +61,9 @@
         <button class="add-btn" onclick="addNewLink()">הוסף למסך</button>
     </div>
 
-    <div id="overlay"></div>
+    <div id="overlay" onclick="closeMenu()"></div>
     <div id="contextMenu">
-        <h3 style="color:#ffff00; text-align:center; margin-top:0;">אפשרויות קישור</h3>
+        <h3 style="color:#ffff00; text-align:center; margin-top:0; font-size:22px;">ניהול קישור</h3>
         <button class="menu-btn btn-edit" onclick="editCurrent()">עריכה</button>
         <button class="menu-btn btn-delete" onclick="deleteCurrent()">מחיקה</button>
         <button class="menu-btn btn-cancel" onclick="closeMenu()">ביטול</button>
@@ -78,15 +90,15 @@
                 a.className = 'link-item';
                 a.innerHTML = `<img src="${getIcon(item.url)}"><span>${item.name}</span>`;
                 
-                // טיפול בלחיצה ארוכה
-                a.ontouchstart = (e) => {
+                a.addEventListener('touchstart', (e) => {
                     longPressTimer = setTimeout(() => {
                         e.preventDefault();
                         showMenu(index);
-                    }, 800);
-                };
-                a.ontouchend = () => clearTimeout(longPressTimer);
-                a.onclick = (e) => { if(currentTargetIndex !== null) e.preventDefault(); };
+                    }, 700);
+                }, {passive: false});
+
+                a.addEventListener('touchend', () => clearTimeout(longPressTimer));
+                a.addEventListener('contextmenu', (e) => e.preventDefault());
 
                 container.appendChild(a);
             });
@@ -105,7 +117,6 @@
         }
 
         function deleteCurrent() {
-            if(currentTargetIndex === null) return;
             let links = JSON.parse(localStorage.getItem('shimiLinks'));
             links.splice(currentTargetIndex, 1);
             localStorage.setItem('shimiLinks', JSON.stringify(links));
