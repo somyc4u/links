@@ -13,7 +13,7 @@
         
         .links-grid { 
             display: grid; 
-            grid-template-columns: repeat(4, 1fr); /* מקבע ל-4 בשורה כמו שביקשת */
+            grid-template-columns: repeat(4, 1fr); 
             gap: 12px; width: 100%; max-width: 500px; 
         }
         
@@ -41,24 +41,44 @@
     <div id="linksContainer" class="links-grid"></div>
 
     <script>
-        // הקישור שלך מתורגם לפורמט CSV שניתן לקריאה
         const SHEET_ID = '1lS8jgBjOtzIC7zWdRWaHiuOjjXe7Cn6L9JlYgGZ6ZEE';
         const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
 
+        // פונקציה לקבלת אייקון - מתחילה משירות DuckDuckGo שהוא חזק יותר
         function getIcon(url) {
-            try { return `https://www.google.com/s2/favicons?sz=128&domain=${new URL(url).hostname}`; }
-            catch (e) { return 'https://via.placeholder.com/128/333/ffff00?text=S'; }
+            try {
+                const domain = new URL(url).hostname;
+                return `https://icons.duckduckgo.com/ip3/${domain}.ico`;
+            }
+            catch (e) { 
+                return 'https://via.placeholder.com/128/333/ffff00?text=S'; 
+            }
+        }
+
+        // פונקציית גיבוי למקרה שהאייקון הראשון נכשל (כמו במכבידנט)
+        function handleIconError(img, url) {
+            const domain = new URL(url).hostname;
+            if (!img.dataset.triedGoogle) {
+                // ניסיון שני דרך גוגל
+                img.src = `https://www.google.com/s2/favicons?sz=128&domain=${domain}`;
+                img.dataset.triedGoogle = "true";
+            } else if (!img.dataset.triedStatvoo) {
+                // ניסיון שלישי דרך שירות נוסף
+                img.src = `https://favicons.githubusercontent.com/u/0?s=128`; 
+                img.dataset.triedStatvoo = "true";
+            } else {
+                // מוותרים ושמים אייקון גנרי
+                img.src = 'https://via.placeholder.com/128/333/ffff00?text=S';
+            }
         }
 
         async function fetchLinks() {
             try {
                 const response = await fetch(SHEET_CSV_URL);
-                if (!response.ok) throw new Error('Network response was not ok');
+                if (!response.ok) throw new Error('Network error');
                 const data = await response.text();
                 
-                // פירוק השורות וטיפול בגרשיים אם יש
                 const rows = data.split(/\r?\n/).slice(1); 
-                
                 const container = document.getElementById('linksContainer');
                 const status = document.getElementById('status');
                 
@@ -71,7 +91,6 @@
                 container.innerHTML = '';
 
                 rows.forEach(row => {
-                    // פיצול חכם שמתעלם מפסיקים בתוך גרשיים
                     const columns = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     if (columns.length >= 2) {
                         const name = columns[0].replace(/"/g, '').trim();
@@ -81,13 +100,14 @@
                             const a = document.createElement('a');
                             a.href = url;
                             a.className = 'link-item';
-                            a.innerHTML = `<img src="${getIcon(url)}"><span>${name}</span>`;
+                            // הוספת האייקון עם מנגנון התיקון האוטומטי
+                            a.innerHTML = `<img src="${getIcon(url)}" onerror="handleIconError(this, '${url}')"><span>${name}</span>`;
                             container.appendChild(a);
                         }
                     }
                 });
             } catch (error) {
-                document.getElementById('status').innerText = 'שגיאה: וודא שהגיליון מוגדר כ-"פורסם באינטרנט"';
+                document.getElementById('status').innerText = 'שגיאה בטעינה. וודא שהקובץ פורסם באינטרנט.';
                 console.error(error);
             }
         }
