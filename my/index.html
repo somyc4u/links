@@ -21,11 +21,12 @@
             display: flex; flex-direction: column; align-items: center; text-decoration: none; 
             background-color: #111; border: 2px solid #333; border-radius: 15px; padding: 12px 5px;
             transition: all 0.2s; -webkit-tap-highlight-color: transparent;
+            min-height: 100px;
         }
 
         .link-item:active { border-color: #ffff00; transform: scale(0.95); }
 
-        .link-item img { width: 42px; height: 42px; border-radius: 10px; margin-bottom: 8px; background: #fff; padding: 2px; }
+        .link-item img { width: 42px; height: 42px; border-radius: 10px; margin-bottom: 8px; background: #fff; padding: 2px; object-fit: contain; }
         .link-item span { 
             color: #ffff00; font-size: 11px; font-weight: bold; text-align: center; 
             line-height: 1.2; word-wrap: break-word; width: 100%;
@@ -37,55 +38,31 @@
 <body>
 
     <h1>הקישורים שלי</h1>
-    <div id="status" class="status-msg">טוען קישורים מהאקסל...</div>
+    <div id="status" class="status-msg">מתחברת לאקסל...</div>
     <div id="linksContainer" class="links-grid"></div>
 
     <script>
         const SHEET_ID = '1lS8jgBjOtzIC7zWdRWaHiuOjjXe7Cn6L9JlYgGZ6ZEE';
         const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
 
-        // פונקציה לקבלת אייקון - מתחילה משירות DuckDuckGo שהוא חזק יותר
-        function getIcon(url) {
+        function getAutoIcon(url) {
             try {
                 const domain = new URL(url).hostname;
-                return `https://icons.duckduckgo.com/ip3/${domain}.ico`;
+                // חוזרים לגוגל כברירת מחדל, הוא יותר נקי מהחצים האפורים
+                return `https://www.google.com/s2/favicons?sz=128&domain=${domain}`;
             }
             catch (e) { 
                 return 'https://via.placeholder.com/128/333/ffff00?text=S'; 
             }
         }
 
-        // פונקציית גיבוי למקרה שהאייקון הראשון נכשל (כמו במכבידנט)
-        function handleIconError(img, url) {
-            const domain = new URL(url).hostname;
-            if (!img.dataset.triedGoogle) {
-                // ניסיון שני דרך גוגל
-                img.src = `https://www.google.com/s2/favicons?sz=128&domain=${domain}`;
-                img.dataset.triedGoogle = "true";
-            } else if (!img.dataset.triedStatvoo) {
-                // ניסיון שלישי דרך שירות נוסף
-                img.src = `https://favicons.githubusercontent.com/u/0?s=128`; 
-                img.dataset.triedStatvoo = "true";
-            } else {
-                // מוותרים ושמים אייקון גנרי
-                img.src = 'https://via.placeholder.com/128/333/ffff00?text=S';
-            }
-        }
-
         async function fetchLinks() {
             try {
                 const response = await fetch(SHEET_CSV_URL);
-                if (!response.ok) throw new Error('Network error');
                 const data = await response.text();
-                
                 const rows = data.split(/\r?\n/).slice(1); 
                 const container = document.getElementById('linksContainer');
                 const status = document.getElementById('status');
-                
-                if (rows.length === 0 || (rows.length === 1 && rows[0] === "")) {
-                    status.innerText = 'האקסל ריק. הוסף נתונים ב-Google Sheets.';
-                    return;
-                }
 
                 status.style.display = 'none';
                 container.innerHTML = '';
@@ -95,23 +72,22 @@
                     if (columns.length >= 2) {
                         const name = columns[0].replace(/"/g, '').trim();
                         const url = columns[1].replace(/"/g, '').trim();
+                        // בודק אם יש קישור לתמונה בעמודה C
+                        let icon = (columns[2] && columns[2].length > 5) ? columns[2].replace(/"/g, '').trim() : getAutoIcon(url);
                         
                         if (name && url) {
                             const a = document.createElement('a');
                             a.href = url;
                             a.className = 'link-item';
-                            // הוספת האייקון עם מנגנון התיקון האוטומטי
-                            a.innerHTML = `<img src="${getIcon(url)}" onerror="handleIconError(this, '${url}')"><span>${name}</span>`;
+                            a.innerHTML = `<img src="${icon}" onerror="this.src='https://via.placeholder.com/128/333/ffff00?text=${name[0]}'"><span>${name}</span>`;
                             container.appendChild(a);
                         }
                     }
                 });
             } catch (error) {
-                document.getElementById('status').innerText = 'שגיאה בטעינה. וודא שהקובץ פורסם באינטרנט.';
-                console.error(error);
+                document.getElementById('status').innerText = 'שגיאה בטעינה';
             }
         }
-
         fetchLinks();
     </script>
 </body>
