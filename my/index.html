@@ -8,9 +8,15 @@
         body { 
             background-color: #000; color: #fff; font-family: system-ui, -apple-system, sans-serif; 
             margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; 
-            min-height: 100vh;
+            min-height: 100vh; scroll-behavior: smooth;
         }
-        h1 { color: #ffff00; font-size: 26px; margin: 15px 0 10px 0; border-bottom: 3px solid #ffff00; padding-bottom: 5px; }
+
+        /* לוגו בראש העמוד */
+        .header-logo {
+            width: 100%; max-width: 500px;
+            height: auto; max-height: 100px; /* גובה קצר כפי שביקשת */
+            object-fit: contain; margin: 10px 0 20px 0;
+        }
         
         #searchBox {
             width: 100%; max-width: 480px; padding: 12px; margin-bottom: 20px;
@@ -39,23 +45,32 @@
         #loadMoreBtn {
             margin: 25px 0; padding: 12px 30px; background-color: #222; color: #ffff00;
             border: 2px solid #ffff00; border-radius: 25px; font-weight: bold; cursor: pointer;
-            transition: 0.3s;
         }
-        #loadMoreBtn:active { background-color: #ffff00; color: #000; }
 
-        /* זכויות יוצרים */
+        /* כפתור חזרה למעלה */
+        #backToTop {
+            position: fixed; bottom: 25px; left: 25px; /* צד שמאל בגלל שהעברית בימין */
+            width: 45px; height: 45px; background-color: #ffff00; color: #000;
+            border-radius: 50%; border: none; font-size: 24px; font-weight: bold;
+            display: none; cursor: pointer; z-index: 1000; box-shadow: 0 4px 10px rgba(255,255,0,0.3);
+        }
+
         footer { margin-top: auto; padding: 20px 0; color: #555; font-size: 12px; text-align: center; border-top: 1px solid #222; width: 100%; }
     </style>
 </head>
 <body>
 
-    <h1>הקישורים שלי</h1>
+    <img src="YOUR_LOGO_URL_HERE" alt="Logo" class="header-logo" id="mainLogo" onerror="this.style.display='none'; document.getElementById('altTitle').style.display='block';">
+    <h1 id="altTitle" style="display:none; color:#ffff00;">הקישורים שלי</h1>
+
     <input type="text" id="searchBox" placeholder="חפש אתר..." onkeyup="filterLinks()">
 
     <div id="status" class="status-msg" style="color:#ffff00">מתחברת לאקסל...</div>
     <div id="linksContainer" class="links-grid"></div>
 
     <button id="loadMoreBtn" style="display: none;" onclick="showAllLinks()">הצג עוד...</button>
+    
+    <button id="backToTop" onclick="window.scrollTo(0,0)">↑</button>
 
     <footer>
         &copy; 2026 דף הקישורים של שימי | כל הזכויות שמורות
@@ -65,6 +80,16 @@
         const SHEET_ID = '1lS8jgBjOtzIC7zWdRWaHiuOjjXe7Cn6L9JlYgGZ6ZEE';
         const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
         let allData = [];
+
+        // הצגת כפתור חזרה למעלה בזמן גלילה
+        window.onscroll = function() {
+            const btn = document.getElementById("backToTop");
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                btn.style.display = "block";
+            } else {
+                btn.style.display = "none";
+            }
+        };
 
         function getAutoIcon(url) {
             try { return `https://www.google.com/s2/favicons?sz=128&domain=${new URL(url).hostname}`; }
@@ -103,20 +128,18 @@
                 if (columns.length >= 2) {
                     const name = columns[0].replace(/"/g, '').trim();
                     const url = columns[1].replace(/"/g, '').trim();
-                    const customIcon = columns[2] ? columns[2].replace(/"/g, '').trim() : "";
-                    const icon = (customIcon.length > 5) ? customIcon : getAutoIcon(url);
+                    const icon = (columns[2] && columns[2].length > 5) ? columns[2].replace(/"/g, '').trim() : getAutoIcon(url);
                     
                     if (name && url) {
                         const a = document.createElement('a');
                         a.href = url;
                         a.className = 'link-item';
-                        if (index >= 20) a.classList.add('hidden'); // הסתרה מעל שורה 5
+                        if (index >= 20) a.classList.add('hidden');
                         a.innerHTML = `<img src="${icon}" onerror="this.src='https://via.placeholder.com/128/333/ffff00?text=${name[0]}'"><span>${name}</span>`;
                         container.appendChild(a);
                     }
                 }
             });
-
             loadMoreBtn.style.display = rows.length > 20 ? "block" : "none";
         }
 
