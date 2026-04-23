@@ -8,9 +8,17 @@
         body { 
             background-color: #000; color: #fff; font-family: system-ui, -apple-system, sans-serif; 
             margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; 
+            min-height: 100vh;
         }
-        h1 { color: #ffff00; font-size: 26px; margin: 20px 0; border-bottom: 3px solid #ffff00; padding-bottom: 5px; }
+        h1 { color: #ffff00; font-size: 26px; margin: 15px 0 10px 0; border-bottom: 3px solid #ffff00; padding-bottom: 5px; }
         
+        #searchBox {
+            width: 100%; max-width: 480px; padding: 12px; margin-bottom: 20px;
+            border-radius: 10px; border: 2px solid #333; background-color: #111;
+            color: #fff; font-size: 16px; outline: none; text-align: right;
+        }
+        #searchBox:focus { border-color: #ffff00; }
+
         .links-grid { 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
@@ -20,70 +28,105 @@
         .link-item { 
             display: flex; flex-direction: column; align-items: center; text-decoration: none; 
             background-color: #111; border: 2px solid #333; border-radius: 15px; padding: 12px 5px;
-            transition: all 0.2s; -webkit-tap-highlight-color: transparent;
-            min-height: 100px;
+            transition: all 0.2s; -webkit-tap-highlight-color: transparent; min-height: 100px;
         }
-
+        .link-item.hidden { display: none; }
         .link-item:active { border-color: #ffff00; transform: scale(0.95); }
-
         .link-item img { width: 42px; height: 42px; border-radius: 10px; margin-bottom: 8px; background: #fff; padding: 2px; object-fit: contain; }
-        .link-item span { 
-            color: #ffff00; font-size: 11px; font-weight: bold; text-align: center; 
-            line-height: 1.2; word-wrap: break-word; width: 100%;
+        .link-item span { color: #ffff00; font-size: 11px; font-weight: bold; text-align: center; line-height: 1.2; }
+
+        /* כפתור הצג עוד */
+        #loadMoreBtn {
+            margin: 25px 0; padding: 12px 30px; background-color: #222; color: #ffff00;
+            border: 2px solid #ffff00; border-radius: 25px; font-weight: bold; cursor: pointer;
+            transition: 0.3s;
         }
-        
-        .status-msg { color: #ffff00; font-style: italic; margin-top: 20px; font-size: 14px; }
+        #loadMoreBtn:active { background-color: #ffff00; color: #000; }
+
+        /* זכויות יוצרים */
+        footer { margin-top: auto; padding: 20px 0; color: #555; font-size: 12px; text-align: center; border-top: 1px solid #222; width: 100%; }
     </style>
 </head>
 <body>
 
     <h1>הקישורים שלי</h1>
-    <div id="status" class="status-msg">מתחברת לאקסל...</div>
+    <input type="text" id="searchBox" placeholder="חפש אתר..." onkeyup="filterLinks()">
+
+    <div id="status" class="status-msg" style="color:#ffff00">מתחברת לאקסל...</div>
     <div id="linksContainer" class="links-grid"></div>
+
+    <button id="loadMoreBtn" style="display: none;" onclick="showAllLinks()">הצג עוד...</button>
+
+    <footer>
+        &copy; 2026 דף הקישורים של שימי | כל הזכויות שמורות
+    </footer>
 
     <script>
         const SHEET_ID = '1lS8jgBjOtzIC7zWdRWaHiuOjjXe7Cn6L9JlYgGZ6ZEE';
         const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+        let allData = [];
 
         function getAutoIcon(url) {
-            try {
-                const domain = new URL(url).hostname;
-                // חוזרים לגוגל כברירת מחדל, הוא יותר נקי מהחצים האפורים
-                return `https://www.google.com/s2/favicons?sz=128&domain=${domain}`;
+            try { return `https://www.google.com/s2/favicons?sz=128&domain=${new URL(url).hostname}`; }
+            catch (e) { return 'https://via.placeholder.com/128/333/ffff00?text=S'; }
+        }
+
+        function filterLinks() {
+            const filter = document.getElementById('searchBox').value.toLowerCase();
+            const items = document.querySelectorAll('.link-item');
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            
+            if (filter.length > 0) {
+                loadMoreBtn.style.display = "none";
+                items.forEach(item => {
+                    const text = item.querySelector('span').innerText.toLowerCase();
+                    item.style.display = text.includes(filter) ? "flex" : "none";
+                });
+            } else {
+                renderLinks(allData);
             }
-            catch (e) { 
-                return 'https://via.placeholder.com/128/333/ffff00?text=S'; 
-            }
+        }
+
+        function showAllLinks() {
+            const hiddenItems = document.querySelectorAll('.link-item.hidden');
+            hiddenItems.forEach(item => item.classList.remove('hidden'));
+            document.getElementById('loadMoreBtn').style.display = "none";
+        }
+
+        function renderLinks(rows) {
+            const container = document.getElementById('linksContainer');
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            container.innerHTML = '';
+            
+            rows.forEach((row, index) => {
+                const columns = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                if (columns.length >= 2) {
+                    const name = columns[0].replace(/"/g, '').trim();
+                    const url = columns[1].replace(/"/g, '').trim();
+                    const customIcon = columns[2] ? columns[2].replace(/"/g, '').trim() : "";
+                    const icon = (customIcon.length > 5) ? customIcon : getAutoIcon(url);
+                    
+                    if (name && url) {
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.className = 'link-item';
+                        if (index >= 20) a.classList.add('hidden'); // הסתרה מעל שורה 5
+                        a.innerHTML = `<img src="${icon}" onerror="this.src='https://via.placeholder.com/128/333/ffff00?text=${name[0]}'"><span>${name}</span>`;
+                        container.appendChild(a);
+                    }
+                }
+            });
+
+            loadMoreBtn.style.display = rows.length > 20 ? "block" : "none";
         }
 
         async function fetchLinks() {
             try {
                 const response = await fetch(SHEET_CSV_URL);
                 const data = await response.text();
-                const rows = data.split(/\r?\n/).slice(1); 
-                const container = document.getElementById('linksContainer');
-                const status = document.getElementById('status');
-
-                status.style.display = 'none';
-                container.innerHTML = '';
-
-                rows.forEach(row => {
-                    const columns = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                    if (columns.length >= 2) {
-                        const name = columns[0].replace(/"/g, '').trim();
-                        const url = columns[1].replace(/"/g, '').trim();
-                        // בודק אם יש קישור לתמונה בעמודה C
-                        let icon = (columns[2] && columns[2].length > 5) ? columns[2].replace(/"/g, '').trim() : getAutoIcon(url);
-                        
-                        if (name && url) {
-                            const a = document.createElement('a');
-                            a.href = url;
-                            a.className = 'link-item';
-                            a.innerHTML = `<img src="${icon}" onerror="this.src='https://via.placeholder.com/128/333/ffff00?text=${name[0]}'"><span>${name}</span>`;
-                            container.appendChild(a);
-                        }
-                    }
-                });
+                allData = data.split(/\r?\n/).slice(1).filter(row => row.trim() !== "");
+                document.getElementById('status').style.display = 'none';
+                renderLinks(allData);
             } catch (error) {
                 document.getElementById('status').innerText = 'שגיאה בטעינה';
             }
