@@ -7,24 +7,121 @@
     <link rel="stylesheet" href="https://pyscript.net/releases/2023.11.1/core.css" />
     <script type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
     <style>
-        body { 
-            background-color: #121212; 
-            color: #00ff00; 
-            font-family: 'Courier New', Courier, monospace; 
-            padding: 20px; 
-            font-size: 16px; 
-            text-align: right;
+        :root {
+            --primary: #00e676;
+            --bg: #0a0a0a;
+            --card-bg: #1a1a1a;
+            --text: #ffffff;
+            --text-muted: #aaaaaa;
         }
-        h1 { color: #ffffff; border-bottom: 2px solid #00ff00; padding-bottom: 10px; font-size: 24px; }
-        #dashboard { background: #1e1e1e; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px dashed #00ff00;}
-        #output { white-space: pre-wrap; background: #000; padding: 15px; border-radius: 5px; line-height: 1.5;}
-        .loading { color: #ffeb3b; }
+        body { 
+            background-color: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 20px; 
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+        h1 { 
+            color: var(--primary); 
+            text-align: center;
+            font-size: 28px; 
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        p.subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        #dashboard { 
+            background: var(--card-bg); 
+            padding: 20px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            border-right: 4px solid var(--primary);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .tickets-container {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            min-height: 200px;
+        }
+        .ticket-row {
+            background: #222;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #333;
+        }
+        .ticket-numbers {
+            font-size: 18px;
+            letter-spacing: 2px;
+            color: #fff;
+        }
+        .ticket-strong {
+            background: var(--primary);
+            color: #000;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .btn-magic {
+            background: linear-gradient(45deg, #00e676, #00b8d4);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: none;
+        }
+        .btn-magic:active {
+            transform: scale(0.98);
+        }
+        .loading-text {
+            color: #ffeb3b;
+            text-align: center;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <h1>🐺 הזאב הבודד PRO - לוח בקרה 🐺</h1>
-    <div id="dashboard" class="loading">מפעילה מנוע סטטיסטי ומתחברת לשרתי הנתונים... (אנא המתן כ-15 שניות) ⚡️</div>
-    <div id="output"></div>
+    <div class="container">
+        <h1>הזאב הבודד PRO</h1>
+        <p class="subtitle">מערכת חכמה לניתוח והפקת טפסי לוטו</p>
+        
+        <div id="dashboard" class="loading-text">
+            מפעיל מנוע סטטיסטי ומתחבר למאגר הנתונים...<br>
+            <small>(טעינה ראשונית עשויה לקחת כ-15 שניות)</small>
+        </div>
+        
+        <div class="tickets-container">
+            <div id="output"></div>
+            <button id="generate-btn" class="btn-magic" py-click="generate_and_display">✨ הפק טפסים מחדש ✨</button>
+        </div>
+    </div>
 
     <py-config>
         packages = ["pandas"]
@@ -36,41 +133,34 @@
         from pyodide.http import open_url
         import js
 
-        # הקישור הישיר לגוגל שיטס של שימי (בפורמט שאיבה נקי)
         sheet_url = "https://docs.google.com/spreadsheets/d/1XDrGrOuNIQCLodDkIIGEykF1JlGAU4mmv2m12cMMSNw/export?format=csv"
         
         dashboard_div = js.document.getElementById("dashboard")
         output_div = js.document.getElementById("output")
+        generate_btn = js.document.getElementById("generate-btn")
+
+        smart_pool = list(range(1, 38))
 
         try:
-            # שאיבת הנתונים בזמן אמת מהגוגל שיטס!
             df = pd.read_csv(open_url(sheet_url))
-            
-            # לוקחים את העמודות של ששת המספרים (בהנחה שהם בעמודות C עד H, כלומר אינדקס 2 עד 7)
             nums_df = df.iloc[:, 2:8]
             all_nums = nums_df.values.flatten()
-            
-            # ניקוי תאים ריקים (במקרה של שורות אקסל ריקות)
             all_nums = [n for n in all_nums if not pd.isna(n)]
             
-            # ניתוח "המספרים הקרים"
             counts = pd.Series(all_nums).value_counts().sort_values()
             smart_pool = counts.head(20).index.tolist()
-            
-            # מציגים בדשבורד את 5 הקרים ביותר
             cold_display = [int(x) for x in counts.head(5).index.tolist()]
             
             dashboard_div.className = ""
-            dashboard_div.style.color = "#00ff00"
-            dashboard_div.innerHTML = f"✅ סריקה ואנליזה הושלמו!<br><br>📊 נסרקו <b>{len(df)}</b> הגרלות היסטוריות מהמאגר.<br>🥶 5 המספרים הקרים ביותר למעקב: <b>{cold_display}</b>"
+            dashboard_div.innerHTML = f"✅ <b>סריקה הושלמה בהצלחה!</b><br><br>📊 נסרקו <b>{len(df)}</b> הגרלות ממאגר הנתונים.<br>🥶 המספרים הקרים למעקב: <b>{cold_display}</b>"
+            generate_btn.style.display = "block"
             
         except Exception as e:
             dashboard_div.className = ""
             dashboard_div.style.color = "#ff5722"
-            dashboard_div.innerHTML = f"⚠️ שגיאה בשאיבת הנתונים. מפעילה מנוע גיבוי אקראי.<br>שגיאה: {str(e)}"
-            smart_pool = list(range(1, 38))
+            dashboard_div.innerHTML = f"⚠️ שגיאה בשאיבת הנתונים. המערכת עברה למצב גיבוי אקראי.<br><small>{str(e)}</small>"
+            generate_btn.style.display = "block"
 
-        # פילטר אנטי-אנושי לטפסים (מונע רצפים כמו 12, 13, 14)
         def is_too_human(ticket):
             consecutive = 0
             for i in range(len(ticket)-1):
@@ -82,13 +172,12 @@
                     consecutive = 0
             return False
 
-        def generate_alpha_ticket():
+        def get_alpha_ticket():
             while True:
                 ticket = []
                 high_nums = [n for n in smart_pool if n >= 32]
                 low_nums = [n for n in smart_pool if n < 32]
                 
-                # מושכים מהמספרים הקרים - דגש על מספרים מעל 31
                 ticket += random.sample(high_nums, min(len(high_nums), 3))
                 rem = 6 - len(ticket)
                 
@@ -98,18 +187,27 @@
                     ticket += random.sample(list(range(1, 32)), rem)
                     
                 ticket.sort()
-                ticket = [int(x) for x in ticket] # דואגת שלא יהיו נקודות עשרוניות
+                ticket = [int(x) for x in ticket]
                 
                 if not is_too_human(ticket):
                     strong = random.choice([1, 2, 3, 4, 5, 6])
                     return ticket, strong
 
-        output_text = "🎯 הטפסים המומלצים להגרלה הקרובה:\n\n"
-        for i in range(5):
-            t, s = generate_alpha_ticket()
-            output_text += f"טופס {i+1}: {t}  |  חזק: {s}\n"
-            
-        output_div.innerHTML = output_text
+        def generate_and_display(event=None):
+            output_div.innerHTML = ""
+            html_content = ""
+            for i in range(5):
+                t, s = get_alpha_ticket()
+                t_str = "  ".join([f"{num:02d}" for num in t])
+                html_content += f'''
+                <div class="ticket-row">
+                    <div class="ticket-numbers">טופס {i+1}: &nbsp;&nbsp;<b>{t_str}</b></div>
+                    <div class="ticket-strong">חזק: {s}</div>
+                </div>
+                '''
+            output_div.innerHTML = html_content
+
+        generate_and_display()
     </script>
 </body>
 </html>
