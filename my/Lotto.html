@@ -38,15 +38,14 @@
             letter-spacing: 1px;
         }
         
-        /* אזור השליטה למעלה */
         .controls-wrapper {
             background: var(--card-bg);
             padding: 20px;
             border-radius: 12px;
-            margin-bottom: 30px;
-            display: none; /* מוסתר עד שהמנוע נטען */
+            margin-bottom: 15px;
+            display: none; 
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
             box-shadow: 0 8px 16px rgba(0,0,0,0.4);
             border: 1px solid #333;
         }
@@ -60,63 +59,72 @@
             border-radius: 8px;
             cursor: pointer;
             width: 100%;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 10px rgba(0, 230, 118, 0.2);
+            transition: transform 0.2s;
         }
         .btn-refresh:active { transform: scale(0.98); }
-        .select-wrapper {
+        
+        .select-group {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 16px;
-            padding: 0 5px;
+            font-size: 15px;
         }
         select {
             background: #222;
             color: #fff;
-            border: 1px solid var(--primary);
-            padding: 10px 15px;
+            border: 1px solid #444;
+            padding: 8px;
             border-radius: 6px;
-            font-size: 16px;
-            width: 50%;
+            font-size: 14px;
+            width: 55%;
             outline: none;
-            cursor: pointer;
         }
-        
-        /* עיצוב הבתים */
-        .house-wrapper {
+
+        /* מסגרת דשבורד קטן */
+        #dashboard {
+            background: #111;
+            padding: 12px;
+            border-radius: 8px;
             margin-bottom: 20px;
-            animation: fadeIn 0.5s ease-in-out;
+            border: 1px solid #333;
+            font-size: 13px;
+            color: #888;
+            line-height: 1.4;
+            display: none;
+        }
+        #dashboard b { color: var(--secondary); }
+        
+        .house-wrapper {
+            margin-bottom: 18px;
+            animation: fadeIn 0.4s ease-in-out;
         }
         .house-title {
             color: var(--secondary);
             font-weight: bold;
-            font-size: 16px;
-            margin-bottom: 8px;
-            padding-right: 5px;
+            font-size: 14px;
+            margin-bottom: 6px;
         }
         .house-box {
             background: var(--card-bg);
-            padding: 18px;
+            padding: 15px;
             border-radius: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border: 1px solid #333;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         .house-numbers {
-            font-size: 22px;
-            letter-spacing: 4px;
+            font-size: 20px;
+            letter-spacing: 3px;
             color: #fff;
         }
         .house-strong {
             background: var(--primary);
             color: #000;
-            padding: 6px 14px;
+            padding: 5px 12px;
             border-radius: 20px;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 16px;
         }
         
         #loading-msg {
@@ -124,15 +132,11 @@
             color: var(--primary);
             font-size: 16px;
             margin-top: 40px;
-            background: #111;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px dashed var(--primary);
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
 </head>
@@ -140,12 +144,13 @@
     <div class="container">
         <h1>🐺 הזאב הבודד PRO 🐺</h1>
         
-        <div id="loading-msg">מנתחת נתונים מהגוגל שיטס שלך וטוענת אסטרטגיות...<br><br><small>המתן מספר שניות 💋</small></div>
+        <div id="loading-msg">מתחברת למאגר הנתונים שלך... 💋</div>
 
         <div id="controls" class="controls-wrapper">
             <button id="generate-btn" class="btn-refresh" py-click="generate_and_display">רענן מספרי לוטו</button>
-            <div class="select-wrapper">
-                <label for="house-count">כמות בתים להפקה:</label>
+            
+            <div class="select-group">
+                <label>כמות בתים:</label>
                 <select id="house-count">
                     <option value="2">2 בתים</option>
                     <option value="4">4 בתים</option>
@@ -156,8 +161,18 @@
                     <option value="14" selected>14 בתים</option>
                 </select>
             </div>
+
+            <div class="select-group">
+                <label>אסטרטגיה:</label>
+                <select id="strategy-select">
+                    <option value="both">שילוב (אדם + מכונה)</option>
+                    <option value="human">התנהגות בני אדם בלבד</option>
+                    <option value="machine">התנהגות מכונה בלבד</option>
+                </select>
+            </div>
         </div>
-        
+
+        <div id="dashboard"></div>
         <div id="output"></div>
     </div>
 
@@ -171,7 +186,6 @@
         from pyodide.http import open_url
         import js
 
-        # מתחברים לשיטס שלך
         sheet_url = "https://docs.google.com/spreadsheets/d/1XDrGrOuNIQCLodDkIIGEykF1JlGAU4mmv2m12cMMSNw/export?format=csv"
         
         try:
@@ -183,86 +197,73 @@
             counts = pd.Series(all_nums).value_counts()
             cold_pool = counts.sort_values(ascending=True).head(20).index.tolist()
             hot_pool = counts.sort_values(ascending=False).head(20).index.tolist()
+            
+            # עדכון הדשבורד הקטן
+            dash = js.document.getElementById("dashboard")
+            dash.style.display = "block"
+            cold_str = ", ".join([str(int(x)) for x in cold_pool[:5]])
+            dash.innerHTML = f"נסרקו <b>{len(df)}</b> הגרלות. המספרים הקרים ביותר כרגע הם: <b>{cold_str}</b>"
+
         except Exception:
             cold_pool = list(range(1, 38))
             hot_pool = list(range(1, 38))
 
-        # מעלימים את הודעת הטעינה ומציגים את אזור השליטה
         js.document.getElementById("loading-msg").style.display = "none"
         js.document.getElementById("controls").style.display = "flex"
 
-        # פילטר נגד רצפים למוח האנושי
         def is_too_human(ticket):
             consecutive = 0
             for i in range(len(ticket)-1):
                 if ticket[i+1] == ticket[i] + 1:
                     consecutive += 1
-                    if consecutive >= 2:
-                        return True
-                else:
-                    consecutive = 0
+                    if consecutive >= 2: return True
+                else: consecutive = 0
             return False
 
         def get_human_ticket():
             while True:
                 ticket = []
-                high_nums = [n for n in cold_pool if n >= 32]
-                low_nums = [n for n in cold_pool if n < 32]
-                
-                ticket += random.sample(high_nums, min(len(high_nums), 3))
+                high = [n for n in cold_pool if n >= 32]
+                low = [n for n in cold_pool if n < 32]
+                ticket += random.sample(high, min(len(high), 3))
                 rem = 6 - len(ticket)
-                
-                if len(low_nums) >= rem:
-                    ticket += random.sample(low_nums, rem)
-                else:
-                    ticket += random.sample(list(range(1, 32)), rem)
-                    
+                ticket += random.sample(low, rem) if len(low) >= rem else random.sample(list(range(1, 32)), rem)
                 ticket.sort()
-                ticket = [int(x) for x in ticket]
-                
                 if not is_too_human(ticket):
-                    strong = random.choice([1, 2, 3, 4, 5, 6])
-                    return ticket, strong, "התנהגות בני אדם 🧠"
+                    return [int(x) for x in ticket], random.choice([1, 2, 3, 4, 5, 6]), "התנהגות בני אדם 🧠"
 
         def get_machine_ticket():
             ticket = random.sample(hot_pool, min(len(hot_pool), 6))
-            if len(ticket) < 6:
-                ticket += random.sample(list(range(1, 38)), 6 - len(ticket))
-            
+            if len(ticket) < 6: ticket += random.sample(list(range(1, 38)), 6 - len(ticket))
             ticket.sort()
-            ticket = [int(x) for x in ticket]
-            strong = random.choice(range(1, 8)) 
-            return ticket, strong, "התנהגות מחולל הפיס ⚙️"
+            return [int(x) for x in ticket], random.choice(range(1, 8)), "התנהגות מחולל הפיס ⚙️"
 
         def generate_and_display(event=None):
-            select_elem = js.document.getElementById("house-count")
-            num_houses = int(select_elem.value)
+            num_houses = int(js.document.getElementById("house-count").value)
+            strat = js.document.getElementById("strategy-select").value
             output_div = js.document.getElementById("output")
-            
             output_div.innerHTML = ""
-            html_content = ""
+            html = ""
             
             for i in range(num_houses):
-                # חלוקה שווה - אחד לאדם, אחד למכונה
-                if i % 2 == 0:
-                    t, s, strategy_name = get_human_ticket()
+                if strat == "human":
+                    t, s, name = get_human_ticket()
+                elif strat == "machine":
+                    t, s, name = get_machine_ticket()
                 else:
-                    t, s, strategy_name = get_machine_ticket()
+                    t, s, name = get_human_ticket() if i % 2 == 0 else get_machine_ticket()
                     
                 t_str = "  ".join([f"{num:02d}" for num in t])
-                house_id = f"{i+1:02d}"
-                
-                html_content += f'''
+                html += f'''
                 <div class="house-wrapper">
-                    <div class="house-title">בית-{house_id} | {strategy_name}</div>
+                    <div class="house-title">בית-{i+1:02d} | {name}</div>
                     <div class="house-box">
                         <div class="house-numbers"><b>{t_str}</b></div>
                         <div class="house-strong">חזק: {s}</div>
                     </div>
                 </div>
                 '''
-            
-            output_div.innerHTML = html_content
+            output_div.innerHTML = html
     </script>
 </body>
 </html>
