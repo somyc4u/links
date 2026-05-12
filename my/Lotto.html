@@ -9,10 +9,10 @@
     <style>
         :root {
             --primary: #00e676;
+            --secondary: #00b8d4;
             --bg: #0a0a0a;
             --card-bg: #1a1a1a;
             --text: #ffffff;
-            --text-muted: #aaaaaa;
         }
         body { 
             background-color: var(--bg); 
@@ -32,95 +32,133 @@
             color: var(--primary); 
             text-align: center;
             font-size: 28px; 
-            margin-bottom: 5px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 15px;
+            letter-spacing: 1px;
         }
-        p.subtitle {
-            text-align: center;
-            color: var(--text-muted);
-            margin-top: 0;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-        #dashboard { 
-            background: var(--card-bg); 
-            padding: 20px; 
-            border-radius: 12px; 
-            margin-bottom: 20px; 
-            border-right: 4px solid var(--primary);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-            font-size: 16px;
-            line-height: 1.6;
-        }
-        .tickets-container {
+        
+        /* אזור השליטה למעלה */
+        .controls-wrapper {
             background: var(--card-bg);
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-            min-height: 200px;
+            margin-bottom: 30px;
+            display: none; /* מוסתר עד שהמנוע נטען */
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            border: 1px solid #333;
         }
-        .ticket-row {
+        .btn-refresh {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: #000;
+            border: none;
+            padding: 18px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 10px rgba(0, 230, 118, 0.2);
+        }
+        .btn-refresh:active { transform: scale(0.98); }
+        .select-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+            padding: 0 5px;
+        }
+        select {
             background: #222;
-            margin-bottom: 10px;
-            padding: 15px;
+            color: #fff;
+            border: 1px solid var(--primary);
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 16px;
+            width: 50%;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        /* עיצוב הבתים */
+        .house-wrapper {
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .house-title {
+            color: var(--secondary);
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 8px;
+            padding-right: 5px;
+        }
+        .house-box {
+            background: var(--card-bg);
+            padding: 18px;
             border-radius: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border: 1px solid #333;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
-        .ticket-numbers {
-            font-size: 18px;
-            letter-spacing: 2px;
+        .house-numbers {
+            font-size: 22px;
+            letter-spacing: 4px;
             color: #fff;
         }
-        .ticket-strong {
+        .house-strong {
             background: var(--primary);
             color: #000;
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
             font-weight: bold;
-            font-size: 16px;
-        }
-        .btn-magic {
-            background: linear-gradient(45deg, #00e676, #00b8d4);
-            color: #000;
-            border: none;
-            padding: 15px 30px;
             font-size: 18px;
-            font-weight: bold;
-            border-radius: 30px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 20px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: none;
         }
-        .btn-magic:active {
-            transform: scale(0.98);
-        }
-        .loading-text {
-            color: #ffeb3b;
+        
+        #loading-msg {
             text-align: center;
-            font-weight: bold;
+            color: var(--primary);
+            font-size: 16px;
+            margin-top: 40px;
+            background: #111;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px dashed var(--primary);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>הזאב הבודד PRO</h1>
-        <p class="subtitle">מערכת חכמה לניתוח והפקת טפסי לוטו</p>
+        <h1>🐺 הזאב הבודד PRO 🐺</h1>
         
-        <div id="dashboard" class="loading-text">
-            מפעיל מנוע סטטיסטי ומתחבר למאגר הנתונים...<br>
-            <small>(טעינה ראשונית עשויה לקחת כ-15 שניות)</small>
+        <div id="loading-msg">מנתחת נתונים מהגוגל שיטס שלך וטוענת אסטרטגיות...<br><br><small>המתן מספר שניות 💋</small></div>
+
+        <div id="controls" class="controls-wrapper">
+            <button id="generate-btn" class="btn-refresh" py-click="generate_and_display">רענן מספרי לוטו</button>
+            <div class="select-wrapper">
+                <label for="house-count">כמות בתים להפקה:</label>
+                <select id="house-count">
+                    <option value="2">2 בתים</option>
+                    <option value="4">4 בתים</option>
+                    <option value="6">6 בתים</option>
+                    <option value="8">8 בתים</option>
+                    <option value="10">10 בתים</option>
+                    <option value="12">12 בתים</option>
+                    <option value="14" selected>14 בתים</option>
+                </select>
+            </div>
         </div>
         
-        <div class="tickets-container">
-            <div id="output"></div>
-            <button id="generate-btn" class="btn-magic" py-click="generate_and_display">✨ הפק טפסים מחדש ✨</button>
-        </div>
+        <div id="output"></div>
     </div>
 
     <py-config>
@@ -133,34 +171,27 @@
         from pyodide.http import open_url
         import js
 
+        # מתחברים לשיטס שלך
         sheet_url = "https://docs.google.com/spreadsheets/d/1XDrGrOuNIQCLodDkIIGEykF1JlGAU4mmv2m12cMMSNw/export?format=csv"
         
-        dashboard_div = js.document.getElementById("dashboard")
-        output_div = js.document.getElementById("output")
-        generate_btn = js.document.getElementById("generate-btn")
-
-        smart_pool = list(range(1, 38))
-
         try:
             df = pd.read_csv(open_url(sheet_url))
             nums_df = df.iloc[:, 2:8]
             all_nums = nums_df.values.flatten()
             all_nums = [n for n in all_nums if not pd.isna(n)]
             
-            counts = pd.Series(all_nums).value_counts().sort_values()
-            smart_pool = counts.head(20).index.tolist()
-            cold_display = [int(x) for x in counts.head(5).index.tolist()]
-            
-            dashboard_div.className = ""
-            dashboard_div.innerHTML = f"✅ <b>סריקה הושלמה בהצלחה!</b><br><br>📊 נסרקו <b>{len(df)}</b> הגרלות ממאגר הנתונים.<br>🥶 המספרים הקרים למעקב: <b>{cold_display}</b>"
-            generate_btn.style.display = "block"
-            
-        except Exception as e:
-            dashboard_div.className = ""
-            dashboard_div.style.color = "#ff5722"
-            dashboard_div.innerHTML = f"⚠️ שגיאה בשאיבת הנתונים. המערכת עברה למצב גיבוי אקראי.<br><small>{str(e)}</small>"
-            generate_btn.style.display = "block"
+            counts = pd.Series(all_nums).value_counts()
+            cold_pool = counts.sort_values(ascending=True).head(20).index.tolist()
+            hot_pool = counts.sort_values(ascending=False).head(20).index.tolist()
+        except Exception:
+            cold_pool = list(range(1, 38))
+            hot_pool = list(range(1, 38))
 
+        # מעלימים את הודעת הטעינה ומציגים את אזור השליטה
+        js.document.getElementById("loading-msg").style.display = "none"
+        js.document.getElementById("controls").style.display = "flex"
+
+        # פילטר נגד רצפים למוח האנושי
         def is_too_human(ticket):
             consecutive = 0
             for i in range(len(ticket)-1):
@@ -172,11 +203,11 @@
                     consecutive = 0
             return False
 
-        def get_alpha_ticket():
+        def get_human_ticket():
             while True:
                 ticket = []
-                high_nums = [n for n in smart_pool if n >= 32]
-                low_nums = [n for n in smart_pool if n < 32]
+                high_nums = [n for n in cold_pool if n >= 32]
+                low_nums = [n for n in cold_pool if n < 32]
                 
                 ticket += random.sample(high_nums, min(len(high_nums), 3))
                 rem = 6 - len(ticket)
@@ -191,23 +222,47 @@
                 
                 if not is_too_human(ticket):
                     strong = random.choice([1, 2, 3, 4, 5, 6])
-                    return ticket, strong
+                    return ticket, strong, "התנהגות בני אדם 🧠"
+
+        def get_machine_ticket():
+            ticket = random.sample(hot_pool, min(len(hot_pool), 6))
+            if len(ticket) < 6:
+                ticket += random.sample(list(range(1, 38)), 6 - len(ticket))
+            
+            ticket.sort()
+            ticket = [int(x) for x in ticket]
+            strong = random.choice(range(1, 8)) 
+            return ticket, strong, "התנהגות מחולל הפיס ⚙️"
 
         def generate_and_display(event=None):
+            select_elem = js.document.getElementById("house-count")
+            num_houses = int(select_elem.value)
+            output_div = js.document.getElementById("output")
+            
             output_div.innerHTML = ""
             html_content = ""
-            for i in range(5):
-                t, s = get_alpha_ticket()
+            
+            for i in range(num_houses):
+                # חלוקה שווה - אחד לאדם, אחד למכונה
+                if i % 2 == 0:
+                    t, s, strategy_name = get_human_ticket()
+                else:
+                    t, s, strategy_name = get_machine_ticket()
+                    
                 t_str = "  ".join([f"{num:02d}" for num in t])
+                house_id = f"{i+1:02d}"
+                
                 html_content += f'''
-                <div class="ticket-row">
-                    <div class="ticket-numbers">טופס {i+1}: &nbsp;&nbsp;<b>{t_str}</b></div>
-                    <div class="ticket-strong">חזק: {s}</div>
+                <div class="house-wrapper">
+                    <div class="house-title">בית-{house_id} | {strategy_name}</div>
+                    <div class="house-box">
+                        <div class="house-numbers"><b>{t_str}</b></div>
+                        <div class="house-strong">חזק: {s}</div>
+                    </div>
                 </div>
                 '''
+            
             output_div.innerHTML = html_content
-
-        generate_and_display()
     </script>
 </body>
 </html>
