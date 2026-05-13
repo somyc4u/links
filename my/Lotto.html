@@ -40,7 +40,7 @@
 
         #dashboard {
             background: #111;
-            padding: 25px 20px 15px 20px; /* הוספתי קצת ריווח למעלה כדי שהמונה לא יסתיר טקסט */
+            padding: 15px 20px;
             border-radius: 8px;
             margin-bottom: 25px;
             border: 1px solid #333;
@@ -49,18 +49,19 @@
             line-height: 1.6;
             display: none;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            position: relative; /* הגדרה קריטית למיקום המונה */
+            position: relative; /* חובה למיקום המונה */
         }
         #dashboard b { color: var(--secondary); font-size: 16px;}
         #dashboard .hot-nums { color: #ff5252; }
         
-        /* עיצוב למונה הכניסות */
+        /* עיצוב למונה הכניסות השקט */
         .visit-counter {
             position: absolute;
             top: 10px;
             left: 10px;
-            opacity: 0.8;
+            opacity: 0.5; /* שקוף מעט כדי לא לבלוט */
             transition: opacity 0.3s ease;
+            filter: invert(1) hue-rotate(180deg); /* הופך את הצבעים כדי שיתאים לרקע כהה */
         }
         .visit-counter:hover {
             opacity: 1;
@@ -206,7 +207,9 @@
         <div id="loading-msg">טוען מערכת. מתחבר למאגר נתונים ומבצע חישובים אסטרטגיים... אנא המתן.</div>
 
         <div id="dashboard">
-            <img src="https://api.visitorbadge.io/api/visitors?path=somyc4u.github.io.lotto&label=%D7%9B%D7%A0%D7%99%D7%A1%D7%95%D7%AA&labelColor=%231a1a1a&countColor=%2300e676" alt="מונה כניסות" class="visit-counter">
+            <a href="https://www.hitwebcounter.com" target="_blank">
+            <img src="https://hitwebcounter.com/counter/counter.php?page=14555887&style=0006&nbdigits=5&type=page&initCount=0" title="Counter Widget" alt="Visit counter For Websites"   border="0" class="visit-counter"/></a>
+            
             <div id="dashboard-content"></div>
         </div>
 
