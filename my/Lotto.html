@@ -40,7 +40,7 @@
 
         #dashboard {
             background: #111;
-            padding: 15px 20px;
+            padding: 25px 20px 15px 20px; /* הוספתי קצת ריווח למעלה כדי שהמונה לא יסתיר טקסט */
             border-radius: 8px;
             margin-bottom: 25px;
             border: 1px solid #333;
@@ -49,10 +49,23 @@
             line-height: 1.6;
             display: none;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            position: relative; /* הגדרה קריטית למיקום המונה */
         }
         #dashboard b { color: var(--secondary); font-size: 16px;}
         #dashboard .hot-nums { color: #ff5252; }
         
+        /* עיצוב למונה הכניסות */
+        .visit-counter {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+        .visit-counter:hover {
+            opacity: 1;
+        }
+
         .controls-wrapper {
             background: var(--card-bg);
             padding: 20px;
@@ -118,8 +131,8 @@
             display: flex;
             justify-content: center; 
             align-items: center;
-            gap: 15px; /* הוספתי עוד קצת מרווח */
-            background-color: var(--card-bg); /* רקע אחיד כפי שביקשת */
+            gap: 15px; 
+            background-color: var(--card-bg); 
         }
         
         .house-numbers {
@@ -131,21 +144,20 @@
             white-space: nowrap; 
         }
         
-        /* שינוי בולט לעיגול של המספר החזק */
         .house-strong-circle {
-            background-color: #00e5ff; /* צבע תכלת-ציאן זוהר וחי */
-            color: #000000; /* טקסט שחור לקונטרסט מקסימלי */
-            width: 40px; /* הגדלתי מעט */
-            height: 40px; /* הגדלתי מעט */
+            background-color: #00e5ff; 
+            color: #000000; 
+            width: 40px; 
+            height: 40px; 
             border-radius: 50%; 
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: 900;
-            font-size: 20px; /* ספרה גדולה יותר */
-            box-shadow: 0 0 10px rgba(0, 229, 255, 0.6), inset 0 0 5px rgba(255,255,255,0.5); /* הוספתי הילה זוהרת מסביב */
+            font-size: 20px; 
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.6), inset 0 0 5px rgba(255,255,255,0.5); 
             flex-shrink: 0; 
-            border: 2px solid #ffffff; /* מסגרת לבנה דקה שתבליט אותו מהרקע הכהה */
+            border: 2px solid #ffffff; 
         }
         
         .footer-container {
@@ -193,7 +205,10 @@
         
         <div id="loading-msg">טוען מערכת. מתחבר למאגר נתונים ומבצע חישובים אסטרטגיים... אנא המתן.</div>
 
-        <div id="dashboard"></div>
+        <div id="dashboard">
+            <img src="https://api.visitorbadge.io/api/visitors?path=somyc4u.github.io.lotto&label=%D7%9B%D7%A0%D7%99%D7%A1%D7%95%D7%AA&labelColor=%231a1a1a&countColor=%2300e676" alt="מונה כניסות" class="visit-counter">
+            <div id="dashboard-content"></div>
+        </div>
 
         <div id="controls" class="controls-wrapper">
             <button id="generate-btn" class="btn-refresh" py-click="generate_and_display">רענן מספרי לוטו</button>
@@ -256,12 +271,13 @@
             hot_pool = counts.sort_values(ascending=False).head(20).index.tolist()
             
             dash = js.document.getElementById("dashboard")
+            dash_content = js.document.getElementById("dashboard-content")
             dash.style.display = "block"
             
             cold_str = "  ".join([f"{int(x):02d}" for x in sorted(cold_pool[:6])]) 
             hot_str = "  ".join([f"{int(x):02d}" for x in sorted(hot_pool[:6])]) 
             
-            dash.innerHTML = f"""
+            dash_content.innerHTML = f"""
                 נסרקו <b>{len(df)}</b> הגרלות.<br><br>
                 * המספרים הקרים ביותר כרגע הם:<br>
                 <b>{cold_str}</b><br><br>
