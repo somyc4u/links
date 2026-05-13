@@ -116,33 +116,36 @@
         .house-box {
             padding: 15px;
             display: flex;
-            justify-content: center; /* יישור למרכז */
+            justify-content: center; 
             align-items: center;
-            gap: 12px; /* רווח בין המספרים לחזק */
+            gap: 15px; /* הוספתי עוד קצת מרווח */
+            background-color: var(--card-bg); /* רקע אחיד כפי שביקשת */
         }
         
         .house-numbers {
-            font-size: 20px; /* מוקטן מעט כדי להיכנס לשורה */
+            font-size: 20px; 
             letter-spacing: 5px; 
             font-weight: bold;
             color: #fff;
             text-shadow: 1px 1px 2px #000;
-            white-space: nowrap; /* שומר בשורה אחת */
+            white-space: nowrap; 
         }
         
+        /* שינוי בולט לעיגול של המספר החזק */
         .house-strong-circle {
-            background-color: #8fa3b0; /* אפור-תכלת כבקשתך */
-            color: #000;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%; /* עיגול מושלם */
+            background-color: #00e5ff; /* צבע תכלת-ציאן זוהר וחי */
+            color: #000000; /* טקסט שחור לקונטרסט מקסימלי */
+            width: 40px; /* הגדלתי מעט */
+            height: 40px; /* הגדלתי מעט */
+            border-radius: 50%; 
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: 900;
-            font-size: 18px;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.5);
-            flex-shrink: 0; /* מונע התכווצות */
+            font-size: 20px; /* ספרה גדולה יותר */
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.6), inset 0 0 5px rgba(255,255,255,0.5); /* הוספתי הילה זוהרת מסביב */
+            flex-shrink: 0; 
+            border: 2px solid #ffffff; /* מסגרת לבנה דקה שתבליט אותו מהרקע הכהה */
         }
         
         .footer-container {
@@ -255,8 +258,8 @@
             dash = js.document.getElementById("dashboard")
             dash.style.display = "block"
             
-            cold_str = "  ".join([f"{int(x):02d}" for x in sorted(cold_pool[:6])]) # הוספתי מיון
-            hot_str = "  ".join([f"{int(x):02d}" for x in sorted(hot_pool[:6])]) # הוספתי מיון
+            cold_str = "  ".join([f"{int(x):02d}" for x in sorted(cold_pool[:6])]) 
+            hot_str = "  ".join([f"{int(x):02d}" for x in sorted(hot_pool[:6])]) 
             
             dash.innerHTML = f"""
                 נסרקו <b>{len(df)}</b> הגרלות.<br><br>
@@ -291,15 +294,15 @@
                 ticket += random.sample(high, min(len(high), 3))
                 rem = 6 - len(ticket)
                 ticket += random.sample(low, rem) if len(low) >= rem else random.sample(list(range(1, 32)), rem)
-                ticket.sort() # מיון המספרים
+                ticket.sort() 
                 if not is_too_human(ticket):
-                    return [int(x) for x in ticket], random.choice([1, 2, 3, 4, 5, 6]), "התנהגות בני אדם 🧠", "#0B192C", "#1E3A8A"
+                    return [int(x) for x in ticket], random.choice([1, 2, 3, 4, 5, 6]), "התנהגות בני אדם 🧠"
 
         def get_machine_ticket():
             ticket = random.sample(hot_pool, min(len(hot_pool), 6))
             if len(ticket) < 6: ticket += random.sample(list(range(1, 38)), 6 - len(ticket))
-            ticket.sort() # מיון המספרים
-            return [int(x) for x in ticket], random.choice(range(1, 8)), "התנהגות מחולל הפיס ⚙️", "#3F0F0F", "#7F1D1D"
+            ticket.sort() 
+            return [int(x) for x in ticket], random.choice(range(1, 8)), "התנהגות מחולל הפיס ⚙️"
 
         def generate_and_display(event=None):
             num_houses = int(js.document.getElementById("house-count").value)
@@ -310,19 +313,18 @@
             
             for i in range(num_houses):
                 if strat == "human":
-                    t, s, name, bg_color, border_color = get_human_ticket()
+                    t, s, name = get_human_ticket()
                 elif strat == "machine":
-                    t, s, name, bg_color, border_color = get_machine_ticket()
+                    t, s, name = get_machine_ticket()
                 else:
-                    t, s, name, bg_color, border_color = get_human_ticket() if i % 2 == 0 else get_machine_ticket()
+                    t, s, name = get_human_ticket() if i % 2 == 0 else get_machine_ticket()
                     
                 t_str = "  ".join([f"{num:02d}" for num in t])
                 
-                # הכנסת הצבעים ישירות (Inline Style) כדי להבטיח שיעבדו
                 html += f'''
                 <div class="house-wrapper">
                     <div class="house-title">{name} | בית-{i+1:02d}</div>
-                    <div class="house-box" style="background-color: {bg_color}; border: 1px solid {border_color};">
+                    <div class="house-box">
                         <div class="house-numbers">{t_str}</div>
                         <div class="house-strong-circle">{s}</div>
                     </div>
