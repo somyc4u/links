@@ -49,23 +49,10 @@
             line-height: 1.6;
             display: none;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            position: relative; /* חובה למיקום המונה */
+            position: relative; 
         }
         #dashboard b { color: var(--secondary); font-size: 16px;}
         #dashboard .hot-nums { color: #ff5252; }
-        
-        /* עיצוב למונה הכניסות השקט */
-        .visit-counter {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            opacity: 0.5; /* שקוף מעט כדי לא לבלוט */
-            transition: opacity 0.3s ease;
-            filter: invert(1) hue-rotate(180deg); /* הופך את הצבעים כדי שיתאים לרקע כהה */
-        }
-        .visit-counter:hover {
-            opacity: 1;
-        }
 
         .controls-wrapper {
             background: var(--card-bg);
@@ -207,9 +194,6 @@
         <div id="loading-msg">טוען מערכת. מתחבר למאגר נתונים ומבצע חישובים אסטרטגיים... אנא המתן.</div>
 
         <div id="dashboard">
-            <a href="https://www.hitwebcounter.com" target="_blank">
-            <img src="https://hitwebcounter.com/counter/counter.php?page=14555887&style=0006&nbdigits=5&type=page&initCount=0" title="Counter Widget" alt="Visit counter For Websites"   border="0" class="visit-counter"/></a>
-            
             <div id="dashboard-content"></div>
         </div>
 
