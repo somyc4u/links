@@ -6,6 +6,10 @@
     <title>מנוע הזאב הבודד PRO</title>
     <link rel="stylesheet" href="https://pyscript.net/releases/2023.11.1/core.css" />
     <script type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
+    
+    <script data-goatcounter="https://lone-wolf-lotto.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+
     <style>
         :root {
             --primary: #00e676;
@@ -208,7 +212,9 @@
         <div id="loading-msg">טוען מערכת... מבצע חישובים אסטרטגיים... אנא המתן.</div>
 
         <div id="dashboard">
-            <div id="counter-display" class="visit-counter-ui">טוען מונה...</div>
+            <div class="visit-counter-ui" id="counter-display">
+                כניסות: <span id="goatcounter-count"></span>
+            </div>
             <div id="dashboard-content"></div>
         </div>
 
@@ -250,6 +256,17 @@
         </div>
     </div>
 
+    <script>
+        fetch('https://lone-wolf-lotto.goatcounter.com/counter//somyc4u.github.io/lotto.json')
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                document.getElementById('goatcounter-count').innerText = data.count || '0';
+            })
+            .catch(function(err) {
+                document.getElementById('goatcounter-count').innerText = '0';
+            });
+    </script>
+
     <py-config>
         packages = ["pandas"]
     </py-config>
@@ -260,24 +277,9 @@
         from pyodide.http import open_url
         import js
 
-        # פונקציה לעדכון המונה דרך API חיצוני שקט
-        async def update_visit_counter():
-            try:
-                # שימוש ב-API ציבורי לספירה
-                url = "https://api.countapi.xyz/hit/somyc4u.github.io/lotto"
-                response = await js.fetch(url)
-                data = await response.json()
-                visits = data.get('value', '0')
-                js.document.getElementById("counter-display").innerHTML = f"כניסות: {visits}"
-            except Exception:
-                js.document.getElementById("counter-display").innerHTML = "מצב אופליין"
-
         sheet_url = "https://docs.google.com/spreadsheets/d/1XDrGrOuNIQCLodDkIIGEykF1JlGAU4mmv2m12cMMSNw/export?format=csv"
         
         try:
-            # הפעלת מונה הכניסות
-            js.setTimeout(update_visit_counter, 100)
-
             df = pd.read_csv(open_url(sheet_url))
             nums_df = df.iloc[:, 2:8]
             all_nums = nums_df.values.flatten()
