@@ -6,10 +6,6 @@
     <title>מנוע הזאב הבודד PRO</title>
     <link rel="stylesheet" href="https://pyscript.net/releases/2023.11.1/core.css" />
     <script type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
-    
-    <script data-goatcounter="https://lone-wolf-lotto.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
-
     <style>
         :root {
             --primary: #00e676;
@@ -53,25 +49,10 @@
             line-height: 1.6;
             display: none;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            position: relative; 
         }
         #dashboard b { color: var(--secondary); font-size: 16px;}
         #dashboard .hot-nums { color: #ff5252; }
-
-        /* מונה כניסות עצמאי ונקי */
-        .visit-counter-ui {
-            position: absolute;
-            top: 10px;
-            left: 15px;
-            font-size: 12px;
-            color: var(--primary);
-            font-family: monospace;
-            background: rgba(0, 230, 118, 0.1);
-            padding: 2px 8px;
-            border-radius: 4px;
-            border: 1px solid rgba(0, 230, 118, 0.2);
-        }
-
+        
         .controls-wrapper {
             background: var(--card-bg);
             padding: 20px;
@@ -209,14 +190,9 @@
     <div class="container">
         <img src="wolf-logo.png" alt="לוגו הזאב הבודד" class="main-logo" onerror="this.style.display='none'">
         
-        <div id="loading-msg">טוען מערכת... מבצע חישובים אסטרטגיים... אנא המתן.</div>
+        <div id="loading-msg">טוען מערכת... מתחבר למאגר נתונים ומבצע חישובים אסטרטגיים... אנא המתן.</div>
 
-        <div id="dashboard">
-            <div class="visit-counter-ui" id="counter-display">
-                כניסות: <span id="goatcounter-count"></span>
-            </div>
-            <div id="dashboard-content"></div>
-        </div>
+        <div id="dashboard"></div>
 
         <div id="controls" class="controls-wrapper">
             <button id="generate-btn" class="btn-refresh" py-click="generate_and_display">רענן מספרי לוטו</button>
@@ -256,17 +232,6 @@
         </div>
     </div>
 
-    <script>
-        fetch('https://lone-wolf-lotto.goatcounter.com/counter//somyc4u.github.io/lotto.json')
-            .then(function(res) { return res.json(); })
-            .then(function(data) {
-                document.getElementById('goatcounter-count').innerText = data.count || '0';
-            })
-            .catch(function(err) {
-                document.getElementById('goatcounter-count').innerText = '0';
-            });
-    </script>
-
     <py-config>
         packages = ["pandas"]
     </py-config>
@@ -290,13 +255,12 @@
             hot_pool = counts.sort_values(ascending=False).head(20).index.tolist()
             
             dash = js.document.getElementById("dashboard")
-            dash_content = js.document.getElementById("dashboard-content")
             dash.style.display = "block"
             
             cold_str = "  ".join([f"{int(x):02d}" for x in sorted(cold_pool[:6])]) 
             hot_str = "  ".join([f"{int(x):02d}" for x in sorted(hot_pool[:6])]) 
             
-            dash_content.innerHTML = f"""
+            dash.innerHTML = f"""
                 נסרקו <b>{len(df)}</b> הגרלות.<br><br>
                 * המספרים הקרים ביותר כרגע הם:<br>
                 <b>{cold_str}</b><br><br>
