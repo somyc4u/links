@@ -113,42 +113,45 @@
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         
+        /* הקופסה של כל העיגולים יחד */
         .house-box {
-            padding: 15px;
+            padding: 15px 5px; /* פחות ריווח בצדדים כדי שייכנס למסך */
             display: flex;
             justify-content: center; 
             align-items: center;
-            gap: 15px; 
+            gap: 6px; /* רווח מינימלי בין 6 המספרים למספר החזק */
             background-color: var(--card-bg); 
-            flex-wrap: wrap; /* מאפשר שבירת שורה במסכים מאוד קטנים */
+            flex-wrap: nowrap; /* מונע שבירת שורה בכל מחיר */
+            overflow-x: auto; /* מאפשר גלילה במקרה קיצוני של מסך צר מאוד */
         }
         
         /* אזור 6 המספרים הרגילים */
         .house-numbers {
             display: flex;
-            gap: 8px; /* רווח בין העיגולים הרגילים */
+            gap: 6px; /* רווח צר יותר בין העיגולים הרגילים */
             justify-content: center;
             align-items: center;
         }
         
-        /* עיצוב עיגול בסיסי לכל מספר */
+        /* עיצוב עיגול בסיסי לכל מספר (מוקטן מעט) */
         .num-circle {
-            width: 38px;
-            height: 38px;
+            width: 32px; /* הוקטן כדי שייכנסו 7 בשורה */
+            height: 32px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 16px; /* הוקטן בהתאם */
             color: #fff;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5), inset 0 0 5px rgba(255,255,255,0.2);
             border: 1px solid rgba(255,255,255,0.2);
+            flex-shrink: 0; /* מונע מעיכה של העיגולים */
         }
 
-        /* צבע כחול לאדם */
+        /* צבע סגול לאדם (החלף את הכחול) */
         .circle-human {
-            background-color: #1976d2; 
+            background-color: #6a1b9a; /* סגול עמוק ויפה */
         }
 
         /* צבע אדום למכונה */
@@ -156,22 +159,22 @@
             background-color: #d32f2f;
         }
         
-        /* המספר החזק - נשאר בולט ושונה */
+        /* המספר החזק - נשאר בשורה */
         .house-strong-circle {
             background-color: #00e5ff; 
             color: #000000; 
-            width: 44px; /* טיפה יותר גדול מהשאר */
-            height: 44px; 
+            width: 36px; /* הוקטן בהתאמה, אבל עדיין גדול מהאחרים */
+            height: 36px; 
             border-radius: 50%; 
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: 900;
-            font-size: 20px; 
+            font-size: 18px; 
             box-shadow: 0 0 10px rgba(0, 229, 255, 0.6), inset 0 0 5px rgba(255,255,255,0.5); 
             flex-shrink: 0; 
             border: 2px solid #ffffff; 
-            margin-right: 10px; /* הפרדה ויזואלית מ-6 המספרים */
+            margin-right: 6px; /* הפרדה ויזואלית קלה */
         }
         
         .footer-container {
@@ -345,10 +348,8 @@
                 else:
                     t, s, name = get_human_ticket() if i % 2 == 0 else get_machine_ticket()
                 
-                # קביעת צבע העיגולים של 6 המספרים הרגילים לפי סוג הבית
                 circle_class = "circle-human" if "אדם" in name else "circle-machine"
                 
-                # יצירת HTML ספציפי לכל אחד מ-6 המספרים הרגילים
                 nums_html = "".join([f'<div class="num-circle {circle_class}">{int(num):02d}</div>' for num in t])
                 
                 html += f'''
