@@ -54,6 +54,20 @@
         #dashboard b { color: var(--secondary); font-size: 16px;}
         #dashboard .hot-nums { color: #ff5252; }
 
+        /* מונה כניסות עצמאי ונקי */
+        .visit-counter-ui {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            font-size: 12px;
+            color: var(--primary);
+            font-family: monospace;
+            background: rgba(0, 230, 118, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 230, 118, 0.2);
+        }
+
         .controls-wrapper {
             background: var(--card-bg);
             padding: 20px;
@@ -191,9 +205,10 @@
     <div class="container">
         <img src="wolf-logo.png" alt="לוגו הזאב הבודד" class="main-logo" onerror="this.style.display='none'">
         
-        <div id="loading-msg">טוען מערכת. מתחבר למאגר נתונים ומבצע חישובים אסטרטגיים... אנא המתן.</div>
+        <div id="loading-msg">טוען מערכת... מבצע חישובים אסטרטגיים... אנא המתן.</div>
 
         <div id="dashboard">
+            <div id="counter-display" class="visit-counter-ui">טוען מונה...</div>
             <div id="dashboard-content"></div>
         </div>
 
@@ -245,9 +260,24 @@
         from pyodide.http import open_url
         import js
 
+        # פונקציה לעדכון המונה דרך API חיצוני שקט
+        async def update_visit_counter():
+            try:
+                # שימוש ב-API ציבורי לספירה
+                url = "https://api.countapi.xyz/hit/somyc4u.github.io/lotto"
+                response = await js.fetch(url)
+                data = await response.json()
+                visits = data.get('value', '0')
+                js.document.getElementById("counter-display").innerHTML = f"כניסות: {visits}"
+            except Exception:
+                js.document.getElementById("counter-display").innerHTML = "מצב אופליין"
+
         sheet_url = "https://docs.google.com/spreadsheets/d/1XDrGrOuNIQCLodDkIIGEykF1JlGAU4mmv2m12cMMSNw/export?format=csv"
         
         try:
+            # הפעלת מונה הכניסות
+            js.setTimeout(update_visit_counter, 100)
+
             df = pd.read_csv(open_url(sheet_url))
             nums_df = df.iloc[:, 2:8]
             all_nums = nums_df.values.flatten()
