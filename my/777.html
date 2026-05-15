@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מנוע 777 - הזאב הבודד</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2023.11.1/core.css" />
+    <script type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
+    <style>
+        :root {
+            --primary: #bb86fc; /* סגול בהיר */
+            --secondary: #6a1b9a; /* סגול מלכותי */
+            --bg: #050505;
+            --card-bg: #121212;
+            --text: #ffffff;
+        }
+        body { 
+            background-color: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 10px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        /* כפתור חזרה ללוטו */
+        .nav-header {
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 15px;
+        }
+        .btn-nav {
+            background: #333;
+            color: #aaa;
+            padding: 8px 15px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 13px;
+            border: 1px solid #444;
+        }
+
+        .main-logo {
+            width: 100%; 
+            max-width: 450px; 
+            display: block; 
+            margin: 0 auto 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(106, 27, 154, 0.4);
+        }
+
+        #dashboard {
+            background: #111;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 1px solid #6a1b9a;
+            font-size: 15px;
+            color: #ddd;
+            line-height: 1.6;
+            display: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+        }
+        #dashboard b { color: var(--primary); font-size: 16px;}
+        
+        .controls-wrapper {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none; 
+            flex-direction: column;
+            gap: 15px;
+            border: 1px solid #333;
+        }
+        .btn-refresh {
+            background: linear-gradient(45deg, var(--secondary), #4a0072);
+            color: #fff;
+            border: 2px solid #ffffff;
+            padding: 15px;
+            font-size: 22px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 0 15px rgba(106, 27, 154, 0.5);
+        }
+        
+        .house-wrapper {
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #444;
+        }
+        .house-title {
+            font-weight: bold;
+            font-size: 14px;
+            padding: 8px 15px;
+            background: rgba(106, 27, 154, 0.3);
+            color: #fff;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .house-box {
+            padding: 15px 5px; 
+            display: flex;
+            justify-content: center; 
+            align-items: center;
+            gap: 4px; 
+            background-color: var(--card-bg); 
+            flex-wrap: nowrap;
+        }
+        
+        .num-circle {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+            border: 2px solid #ffffff;
+            flex-shrink: 0; 
+        }
+
+        .circle-human { background-color: #6a1b9a; }
+        .circle-machine { background-color: #d32f2f; }
+        
+        #loading-msg {
+            text-align: center;
+            color: var(--primary);
+            font-size: 16px;
+            margin-top: 50px;
+            font-family: monospace;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 11px;
+            color: #666;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-header">
+            <a href="index.html" class="btn-nav">← חזרה ללוטו 37</a>
+        </div>
+
+        <img src="wolf-logo.png" alt="לוגו הזאב הבודד 777" class="main-logo" onerror="this.style.display='none'">
+        
+        <div id="loading-msg">מתחבר למאגר Data_777... מבצע ניתוח סטטיסטי...</div>
+
+        <div id="dashboard"></div>
+
+        <div id="controls" class="controls-wrapper">
+            <button id="generate-btn" class="btn-refresh" py-click="generate_and_display">רענן מספרי 777</button>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label>כמות בתים:</label>
+                <select id="house-count" style="background:#222; color:#fff; padding:5px; border-radius:5px;">
+                    <option value="5">5 בתים</option>
+                    <option value="10" selected>10 בתים</option>
+                    <option value="15">15 בתים</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="output"></div>
+
+        <div class="footer">
+            © 2026 מנוע הזאב הבודד - מהדורת 777 PRO<br>
+            התוצאות מבוססות על ניתוח סטטיסטי בלבד. ט.ל.ח.
+        </div>
+    </div>
+
+    <py-config>
+        packages = ["pandas"]
+    </py-config>
+
+    <script type="py">
+        import pandas as pd
+        import random
+        from pyodide.http import open_url
+        import js
+
+        # קישור לקובץ עם הפנייה לחוצץ Data_777
+        # שים לב: אם הנתונים לא נטענים, וודא שה-gid תואם לחוצץ שלך
+        sheet_url = "https://docs.google.com/spreadsheets/d/1XDrGrOuNIQCLodDkIIGEykF1JlGAU4mmv2m12cMMSNw/export?format=csv&gid=0"
+        
+        try:
+            df = pd.read_csv(open_url(sheet_url))
+            # שאיבת מספרים מעמודות C עד S (אינדקס 2 עד 19)
+            nums_df = df.iloc[:, 2:19]
+            all_nums = nums_df.values.flatten()
+            all_nums = [n for n in all_nums if not pd.isna(n)]
+            
+            counts = pd.Series(all_nums).value_counts()
+            cold_pool = counts.sort_values(ascending=True).head(25).index.tolist()
+            hot_pool = counts.sort_values(ascending=False).head(25).index.tolist()
+            
+            dash = js.document.getElementById("dashboard")
+            dash.style.display = "block"
+            
+            dash.innerHTML = f"נסרקו <b>{len(df)}</b> הגרלות 777 מהמאגר.<br>המערכת זיהתה מגמות בלוח ה-70 ומוכנה לייצור צירופים."
+
+        except Exception as e:
+            js.console.log(str(e))
+            cold_pool = list(range(1, 71))
+            hot_pool = list(range(1, 71))
+
+        js.document.getElementById("loading-msg").style.display = "none"
+        js.document.getElementById("controls").style.display = "flex"
+
+        def get_human_ticket():
+            # אסטרטגיית אדם: פיזור רחב על הלוח
+            ticket = random.sample(cold_pool, 7) if len(cold_pool) >= 7 else random.sample(range(1, 71), 7)
+            ticket.sort()
+            return [int(x) for x in ticket], "התנהגות בני אדם 🧠"
+
+        def get_machine_ticket():
+            # אסטרטגיית מכונה: התמקדות במספרים חמים
+            ticket = random.sample(hot_pool, 7) if len(hot_pool) >= 7 else random.sample(range(1, 71), 7)
+            ticket.sort()
+            return [int(x) for x in ticket], "התנהגות המכונה ⚙️"
+
+        def generate_and_display(event=None):
+            num_houses = int(js.document.getElementById("house-count").value)
+            output_div = js.document.getElementById("output")
+            output_div.innerHTML = ""
+            html = ""
+            
+            for i in range(num_houses):
+                t, name = get_human_ticket() if i % 2 == 0 else get_machine_ticket()
+                circle_class = "circle-human" if "אדם" in name else "circle-machine"
+                nums_html = "".join([f'<div class="num-circle {circle_class}">{int(num):02d}</div>' for num in t])
+                
+                html += f'''
+                <div class="house-wrapper">
+                    <div class="house-title">{name} | בית-{i+1:02d}</div>
+                    <div class="house-box">{nums_html}</div>
+                </div>
+                '''
+            output_div.innerHTML = html
+    </script>
+</body>
+</html>
