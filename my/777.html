@@ -38,7 +38,7 @@
             box-shadow: 0 4px 15px rgba(187, 134, 252, 0.3);
         }
 
-        /* כפתורי ניווט חדשים ומודגשים */
+        /* כפתורי ניווט מודגשים וגדולים */
         .nav-wrapper {
             display: flex;
             justify-content: center;
@@ -48,13 +48,13 @@
         }
         .btn-nav {
             flex: 1;
-            padding: 12px; /* מעט יותר מרווח פנימי לכפתור גדול יותר */
+            padding: 12px;
             text-align: center;
             text-decoration: none;
             color: #fff;
             border-radius: 8px;
-            font-weight: 900; /* הדגשה מקסימלית - Bold */
-            font-size: 20px; /* הגדלת הטקסט באופן משמעותי */
+            font-weight: 900; /* מודגש מאוד */
+            font-size: 20px; /* גדול וברור */
             border: 1px solid #444;
             transition: background 0.3s;
         }
@@ -155,7 +155,7 @@
             font-weight: bold;
             font-size: 18px;
             color: #fff;
-            border: 2px solid #ffffff; 
+            border: 2px solid #ffffff; /* הפס המעוגל הלבן */
             box-shadow: 0 2px 5px rgba(0,0,0,0.6);
             flex-shrink: 0; 
         }
@@ -163,13 +163,14 @@
         .circle-human { background-color: #6a1b9a; }
         .circle-machine { background-color: #d32f2f; }
         
+        /* אזור ה-Footer החדש עם המסגרת */
         .footer-container {
             margin-top: 30px;
             width: 100%;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            display: none;
+            display: none; /* מוסתר עד שטעינת הנתונים תסתיים */
         }
         .disclaimer-box {
             border: 1px solid #444;
@@ -179,6 +180,10 @@
             font-size: 11px;
             color: #888;
             text-align: justify;
+            line-height: 1.4;
+        }
+        .disclaimer-box b {
+            color: #eee;
         }
         .copyright {
             text-align: center;
@@ -226,10 +231,10 @@
 
         <div id="footer-area" class="footer-container">
             <div class="disclaimer-box">
-                <b>הסרת אחריות:</b> התוצאות מבוססות על ניתוח סטטיסטי בלבד. ההשתתפות בהגרלות היא על אחריות המשתמש בלבד. ט.ל.ח.
+                <b>הסרת אחריות:</b> התוצאות המופקות באתר זה מבוססות על ניתוח סטטיסטי והסתברותי של הגרלות עבר. אין לראות בהן המלצה, הבטחה או ערובה לזכייה. ההשתתפות בהגרלות מפעל הפיס היא על אחריות המשתמש בלבד ומומלצת לבני 18 ומעלה. ט.ל.ח.
             </div>
             <div class="copyright">
-                © 2026 כל הזכויות שמורות לאתר "הזאב הבודד"
+                © 2026 כל הזכויות שמורות לאתר "הזאב הבודד" - שמעון (שימי)
             </div>
         </div>
     </div>
@@ -244,7 +249,7 @@
         from pyodide.http import open_url
         import js
 
-        # קישור לחוצץ Data_777
+        # קישור לחוצץ Data_777 (gid=125193362)
         sheet_url = "https://docs.google.com/spreadsheets/d/1XDrGrOuNIQCLodDkIIGEykF1JlGAU4mmv2m12cMMSNw/export?format=csv&gid=125193362"
         
         try:
@@ -273,9 +278,11 @@
             """
 
         except Exception:
+            # במקרה של שגיאה, השתמש בטווח המספרים המלא
             cold_pool = list(range(1, 71))
             hot_pool = list(range(1, 71))
 
+        # הצגת הפקדים וה-Footer לאחר סיום הטעינה
         js.document.getElementById("loading-msg").style.display = "none"
         js.document.getElementById("controls").style.display = "flex"
         js.document.getElementById("footer-area").style.display = "flex"
@@ -287,7 +294,7 @@
             html = ""
             
             for i in range(num_houses):
-                # בחירת אסטרטגיה
+                # בחירת אסטרטגיה לסירוגין
                 if i % 2 == 0:
                     pool = cold_pool if len(cold_pool) >= 7 else range(1, 71)
                     name = "התנהגות בני אדם 🧠"
@@ -297,9 +304,11 @@
                     name = "התנהגות מכונה ⚙️"
                     circle_class = "circle-machine"
                 
+                # שליפת 7 מספרים מתוך ה-Pool המתאים
                 ticket = random.sample(list(pool), 7)
                 ticket.sort()
                 
+                # יצירת ה-HTML לעיגולים
                 nums_html = "".join([f'<div class="num-circle {circle_class}">{int(num):02d}</div>' for num in ticket])
                 
                 html += f'''
@@ -310,6 +319,7 @@
                     </div>
                 </div>
                 '''
+            # הצגת הבתים שנוצרו
             output_div.innerHTML = html
     </script>
 </body>
