@@ -38,6 +38,34 @@
             box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
         }
 
+        /* ----- תוספת כפתורי הניווט שביקשת ----- */
+        .nav-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        .btn-nav {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            border-radius: 8px;
+            font-weight: 900;
+            font-size: 20px;
+            border: 1px solid #444;
+            transition: background 0.3s;
+        }
+        .nav-lotto { 
+            background: var(--primary); 
+            color: #000; 
+            border: 2px solid #fff;
+        }
+        .nav-777 { background: #333; }
+        /* -------------------------------------- */
+
         #dashboard {
             background: #111;
             padding: 15px 20px;
@@ -218,6 +246,10 @@
     <div class="container">
         <img src="wolf-logo.png" alt="לוגו הזאב הבודד" class="main-logo" onerror="this.style.display='none'">
         
+        <div class="nav-wrapper">
+            <a href="Lotto.html" class="btn-nav nav-lotto">טפסי לוטו</a>
+            <a href="777.html" class="btn-nav nav-777">טפסי 777</a>
+        </div>
         <div id="loading-msg">טוען מערכת... מתחבר למאגר נתונים ומבצע חישובים אסטרטגיים... אנא המתן.</div>
 
         <div id="dashboard"></div>
