@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מנוע הזאב הבודד PRO</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2023.11.1/core.css" />
+    <script type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
+    <style>
+        :root {
+            --primary: #00e676;
+            --secondary: #00b8d4;
+            --bg: #0a0a0a;
+            --card-bg: #1a1a1a;
+            --text: #ffffff;
+            --alert: #ffb300; /* צבע אזהרה למספרים מאחרים */
+        }
+        body { 
+            background-color: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 10px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .main-logo {
+            width: 100%; 
+            max-width: 500px; 
+            display: block; 
+            margin: 0 auto 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
+        }
+
+        .nav-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        .btn-nav {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            border-radius: 8px;
+            font-weight: 900;
+            font-size: 20px;
+            border: 1px solid #444;
+            transition: background 0.3s;
+        }
+        .nav-lotto { 
+            background: var(--primary); 
+            color: #000; 
+            border: 2px solid #fff;
+        }
+        .nav-777 { background: #333; }
+
+        #dashboard {
+            background: #111;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid #333;
+            font-size: 15px;
+            color: #ddd;
+            line-height: 1.6;
+            display: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        #dashboard b { color: var(--secondary); font-size: 16px;}
+        #dashboard .hot-nums { color: #ff5252; }
+        #dashboard .overdue-nums { color: var(--alert); }
+        
+        .controls-wrapper {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none; 
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            border: 1px solid #333;
+        }
+        .btn-refresh {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: #000;
+            border: 3px solid #ffffff;
+            padding: 15px;
+            font-size: 22px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 15px rgba(0, 230, 118, 0.4);
+        }
+        .btn-refresh:active { transform: scale(0.98); }
+        
+        .select-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 15px;
+        }
+        select {
+            background: #222;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 15px;
+            width: 55%;
+            outline: none;
+        }
+        
+        .house-wrapper {
+            margin-bottom: 20px;
+            animation: fadeIn 0.4s ease-in-out;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            border: 1px solid #444;
+        }
+        .house-title {
+            font-weight: bold;
+            font-size: 14px;
+            padding: 8px 15px;
+            background: rgba(0,0,0,0.5);
+            color: #fff;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .house-box {
+            padding: 15px 5px; 
+            display: flex;
+            justify-content: center; 
+            align-items: center;
+            gap: 5px; 
+            background-color: var(--card-bg); 
+            flex-wrap: nowrap; 
+            overflow-x: auto; 
+        }
+        
+        .house-numbers {
+            display: flex;
+            gap: 5px; 
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .num-circle {
+            width: 36px; 
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 18px; 
+            color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.6), inset 0 0 5px rgba(255,255,255,0.3);
+            border: 2px solid #ffffff; 
+            flex-shrink: 0; 
+        }
+
+        .circle-human { background-color: #6a1b9a; }
+        .circle-machine { background-color: #d32f2f; }
+        
+        .house-strong-circle {
+            background-color: #00e5ff; 
+            color: #000000; 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 900;
+            font-size: 20px; 
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.6), inset 0 0 5px rgba(255,255,255,0.5); 
+            flex-shrink: 0; 
+            border: 2px solid #ffffff; 
+            margin-right: 6px; 
+        }
+        
+        .footer-container {
+            margin-top: 40px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            display: none;
+        }
+        .disclaimer-box {
+            border: 1px solid #555;
+            background: #151515;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            color: #888;
+            text-align: justify;
+            line-height: 1.4;
+        }
+        .copyright {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        #loading-msg {
+            text-align: center;
+            color: var(--primary);
+            font-size: 16px;
+            margin-top: 50px;
+            font-family: monospace;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="wolf-logo.png" alt="לוגו הזאב הבודד" class="main-logo" onerror="this.style.display='none'">
+        
+        <div class="nav-wrapper">
+            <a href="Lotto.html" class="btn-nav nav-lotto">טפסי לוטו</a>
+            <a href="777.html" class="btn-nav nav-777">טפסי 777</a>
+        </div>
+
+        <div id="loading-msg">טוען מערכת... מתחבר למאגר נתונים ומבצע חישובים אסטרטגיים... אנא המתן.</div>
+
+        <div id="dashboard"></div>
+
+        <div id="controls" class="controls-wrapper">
+            <button id="generate-btn" class="btn-refresh" py-click="generate_and_display">רענן מספרי לוטו</button>
+            
+            <div class="select-group">
+                <label>כמות בתים:</label>
+                <select id="house-count">
+                    <option value="2">2 בתים</option>
+                    <option value="4">4 בתים</option>
+                    <option value="6">6 בתים</option>
+                    <option value="8">8 בתים</option>
+                    <option value="10">10 בתים</option>
+                    <option value="12">12 בתים</option>
+                    <option value="14" selected>14 בתים</option>
+                </select>
+            </div>
+
+            <div class="select-group">
+                <label>אסטרטגיה:</label>
+                <select id="strategy-select">
+                    <option value="both">שילוב התיאוריות (פערים + להקות)</option>
+                    <option value="human">התנהגות בני אדם (קרים + להקות)</option>
+                    <option value="machine">התנהגות מכונה (חמים + להקות)</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="output"></div>
+
+        <div id="footer-area" class="footer-container">
+            <div class="disclaimer-box">
+                <b>הסרת אחריות:</b> התוצאות והמספרים המופקים באתר "הזאב הבודד" מבוססים על ניתוח סטטיסטי בלבד ואינם מהווים המלצה, הבטחה או ערובה לזכייה מכל סוג שהוא. ההשתתפות בהגרלות הלוטו היא על אחריות המשתמש בלבד. הנהלת האתר אינה נושאת בשום אחריות לכל אובדן, הפסד כספי, נזק ישיר או עקיף שייגרם כתוצאה משימוש במידע המופיע במערכת. ט.ל.ח.
+            </div>
+            <div class="copyright">
+                © 2026 כל הזכויות שמורות לאתר "הזאב הבודד" - שמעון (שימי)
+            </div>
+        </div>
+    </div>
+
+    <py-config>
+        packages = ["pandas"]
+    </py-config>
+
+    <script type="py">
+        import pandas as pd
+        import random
+        from pyodide.http import open_url
+        import js
+        from collections import defaultdict
+
+        sheet_url = "https://docs.google.com/spreadsheets/d/1XDrGrOuNIQCLodDkIIGEykF1JlGAU4mmv2m12cMMSNw/export?format=csv&gid=0"
+        
+        cold_pool = []
+        hot_pool = []
+        pair_partners = {}
+        overdue_pool = []
+        strong_hot = []
+        strong_cold = []
+
+        try:
+            df = pd.read_csv(open_url(sheet_url))
+            
+            # 1. חלון מומנטום: 100 הגרלות אחרונות לניתוח הלוטו
+            recent_df = df.head(100)
+            
+            nums_df = recent_df.iloc[:, 2:8]
+            all_nums = nums_df.values.flatten()
+            all_nums = [n for n in all_nums if not pd.isna(n)]
+            
+            strong_df = recent_df.iloc[:, 8]
+            all_strong = [n for n in strong_df.values if not pd.isna(n)]
+            
+            counts = pd.Series(all_nums).value_counts()
+            cold_pool = counts.sort_values(ascending=True).head(15).index.tolist()
+            hot_pool = counts.sort_values(ascending=False).head(15).index.tolist()
+            
+            strong_counts = pd.Series(all_strong).value_counts()
+            strong_hot = strong_counts.sort_values(ascending=False).head(4).index.tolist()
+            strong_cold = strong_counts.sort_values(ascending=True).head(4).index.tolist()
+            
+            # 2. תורת הפערים ללוטו: מס' שלא יצאו לאחרונה
+            gaps = {n: 100 for n in range(1, 38)}
+            for i in range(len(recent_df)):
+                row = recent_df.iloc[i]
+                draw = [int(x) for x in row.iloc[2:8].dropna().values if 1 <= x <= 37]
+                for num in draw:
+                    if i < gaps[num]:
+                        gaps[num] = i
+                        
+            overdue_pool = [n for n, gap in gaps.items() if gap >= 15] # דילוג של 15 בלוטו שווה לדילוג 7 ב-777
+            
+            # 3. תורת הלהקות ללוטו
+            raw_pairs = defaultdict(lambda: defaultdict(int))
+            for i in range(len(recent_df)):
+                row = recent_df.iloc[i]
+                draw = [int(x) for x in row.iloc[2:8].dropna().values if 1 <= x <= 37]
+                for x in range(len(draw)):
+                    for y in range(len(draw)):
+                        if x != y:
+                            raw_pairs[draw[x]][draw[y]] += 1
+            
+            for num, partners in raw_pairs.items():
+                sorted_partners = sorted(partners.items(), key=lambda item: item[1], reverse=True)
+                pair_partners[num] = [p[0] for p in sorted_partners]
+            
+            dash = js.document.getElementById("dashboard")
+            dash.style.display = "block"
+            
+            cold_str = "  ".join([f"{int(x):02d}" for x in sorted(cold_pool[:6])]) 
+            hot_str = "  ".join([f"{int(x):02d}" for x in sorted(hot_pool[:6])]) 
+            overdue_str = "  ".join([f"{int(x):02d}" for x in sorted(overdue_pool)]) if overdue_pool else "אין כרגע"
+            
+            dash.innerHTML = f"""
+                נסרקו <b>{len(df)}</b> הגרלות (מבוסס על 100 האחרונות).<br><br>
+                * המספרים הקרים ביותר:<br>
+                <b>{cold_str}</b><br>
+                * המספרים החמים ביותר:<br>
+                <b class="hot-nums">{hot_str}</b><br>
+                * ⚡ מספרים רגילים "חייבים" (עפ"י דילוגים):<br>
+                <b class="overdue-nums">{overdue_str}</b>
+            """
+
+        except Exception as e:
+            js.console.log(f"Error loading data: {str(e)}")
+            cold_pool = list(range(1, 38))
+            hot_pool = list(range(1, 38))
+            strong_hot = list(range(1, 8))
+            strong_cold = list(range(1, 8))
+
+        js.document.getElementById("loading-msg").style.display = "none"
+        js.document.getElementById("controls").style.display = "flex"
+        js.document.getElementById("footer-area").style.display = "flex"
+
+        def is_too_human(ticket):
+            consecutive = 0
+            for i in range(len(ticket)-1):
+                if ticket[i+1] == ticket[i] + 1:
+                    consecutive += 1
+                    if consecutive >= 2: return True
+                else: consecutive = 0
+            return False
+
+        def get_ultimate_lotto_ticket(strategy, index):
+            if strategy == "human":
+                pool = cold_pool
+                s_pool = strong_cold
+                name = "התנהגות בני אדם 🧠"
+                cls = "circle-human"
+            elif strategy == "machine":
+                pool = hot_pool
+                s_pool = strong_hot
+                name = "התנהגות מכונה ⚙️"
+                cls = "circle-machine"
+            else:
+                if index % 2 == 0:
+                    pool = cold_pool
+                    s_pool = strong_cold
+                    name = "שילוב מערכות 🧠"
+                    cls = "circle-human"
+                else:
+                    pool = hot_pool
+                    s_pool = strong_hot
+                    name = "שילוב מערכות ⚙️"
+                    cls = "circle-machine"
+            
+            available_pool = [int(x) for x in pool if 1 <= x <= 37]
+            if len(available_pool) < 6:
+                all_possible = list(range(1, 38))
+                random.shuffle(all_possible)
+                for n in all_possible:
+                    if n not in available_pool:
+                        available_pool.append(n)
+            
+            ticket = set()
+            
+            # שלב א': תורת הפערים
+            if overdue_pool:
+                num_overdue = min(len(overdue_pool), 1)
+                picked_overdue = random.sample(overdue_pool, num_overdue)
+                for n in picked_overdue:
+                    ticket.add(int(n))
+                    
+            if not ticket:
+                first_num = random.choice(available_pool[:10]) if len(available_pool) >= 10 else random.choice(available_pool)
+                ticket.add(int(first_num))
+            
+            # שלב ב': תורת הלהקות והגבלות (מניעת רצפים מדי "אנושיים")
+            attempts = 0
+            while len(ticket) < 6 and attempts < 50:
+                partner_found = False
+                current_num = random.choice(list(ticket))
+                
+                if current_num in pair_partners:
+                    for partner in pair_partners[current_num]:
+                        if partner in available_pool and partner not in ticket:
+                            if random.random() < 0.70:
+                                temp_ticket = sorted(list(ticket) + [int(partner)])
+                                if not is_too_human(temp_ticket):
+                                    ticket.add(int(partner))
+                                    partner_found = True
+                                    break
+                
+                if not partner_found:
+                    rem = [x for x in available_pool if x not in ticket]
+                    if rem:
+                        candidate = int(random.choice(rem))
+                        temp_ticket = sorted(list(ticket) + [candidate])
+                        if not is_too_human(temp_ticket):
+                            ticket.add(candidate)
+                attempts += 1
+            
+            # השלמה במקרה שהלולאה נתקעה
+            while len(ticket) < 6:
+                rem = [x for x in available_pool if x not in ticket]
+                if not rem: rem = [x for x in range(1, 38) if x not in ticket]
+                ticket.add(int(random.choice(rem)))
+                
+            sorted_ticket = sorted(list(ticket))
+            strong_num = int(random.choice(s_pool)) if s_pool else random.randint(1, 7)
+            
+            return sorted_ticket, strong_num, name, cls
+
+        def generate_and_display(event=None):
+            num_houses = int(js.document.getElementById("house-count").value)
+            strat = js.document.getElementById("strategy-select").value
+            output_div = js.document.getElementById("output")
+            output_div.innerHTML = ""
+            html = ""
+            
+            for i in range(num_houses):
+                t, s, name, circle_class = get_ultimate_lotto_ticket(strat, i)
+                
+                nums_html = "".join([f'<div class="num-circle {circle_class}">{int(num):02d}</div>' for num in t])
+                strong_html = f'<div class="house-strong-circle">{s}</div>'
+                
+                html += f'''
+                <div class="house-wrapper">
+                    <div class="house-title">{name} | בית-{i+1:02d}</div>
+                    <div class="house-box">
+                        <div class="house-numbers">{nums_html}</div>
+                        {strong_html}
+                    </div>
+                </div>
+                '''
+            output_div.innerHTML = html
+    </script>
+</body>
+</html>
