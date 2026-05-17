@@ -13,7 +13,6 @@
             --bg: #0a0a0a;
             --card-bg: #1a1a1a;
             --text: #ffffff;
-            --alert: #ffb300; /* צבע אזהרה למספרים שחייבים לצאת */
         }
         body { 
             background-color: var(--bg); 
@@ -79,7 +78,6 @@
         }
         #dashboard b { color: var(--primary); font-size: 16px;}
         #dashboard .hot-nums { color: #ff5252; }
-        #dashboard .overdue-nums { color: var(--alert); } /* עיצוב למספרים המאחרים */
         
         .controls-wrapper {
             background: var(--card-bg);
@@ -228,9 +226,9 @@
             <div class="select-group">
                 <label>אסטרטגיה:</label>
                 <select id="strategy-select">
-                    <option value="both">שילוב התיאוריות (פערים + להקות)</option>
-                    <option value="human">התנהגות בני אדם (קרים + להקות)</option>
-                    <option value="machine">התנהגות מכונה (חמים + להקות)</option>
+                    <option value="both">שילוב (אדם + מכונה)</option>
+                    <option value="human">התנהגות בני אדם בלבד</option>
+                    <option value="machine">התנהגות מכונה בלבד</option>
                 </select>
             </div>
 
@@ -273,13 +271,12 @@
         cold_pool = []
         hot_pool = []
         pair_partners = {}
-        overdue_pool = []
 
         try:
             df = pd.read_csv(open_url(sheet_url))
             
-            # 1. חלון מומנטום: 100 הגרלות אחרונות
-            recent_df = df.head(100)
+            # עדכון ל-153 הגרלות אחרונות
+            recent_df = df.head(153)
             
             nums_df = recent_df.iloc[:, 2:19]
             all_nums = nums_df.values.flatten()
@@ -289,26 +286,13 @@
             cold_pool = counts.sort_values(ascending=True).head(28).index.tolist()
             hot_pool = counts.sort_values(ascending=False).head(28).index.tolist()
             
-            # 2. תורת הפערים: מציאת מספרים ש"חייבים לצאת" (Gap >= 7)
-            gaps = {n: 100 for n in range(1, 71)}
-            for i in range(len(recent_df)):
-                row = recent_df.iloc[i]
-                draw = [int(x) for x in row.iloc[2:19].dropna().values if 1 <= x <= 70]
-                for num in draw:
-                    if i < gaps[num]:
-                        gaps[num] = i
-                        
-            overdue_pool = [n for n, gap in gaps.items() if gap >= 7]
-            
-            # 3. תורת הלהקות: מיפוי קשרים וצמדים
             raw_pairs = defaultdict(lambda: defaultdict(int))
-            for i in range(len(recent_df)):
-                row = recent_df.iloc[i]
+            for _, row in recent_df.iterrows():
                 draw = [int(x) for x in row.iloc[2:19].dropna().values if 1 <= x <= 70]
-                for x in range(len(draw)):
-                    for y in range(len(draw)):
-                        if x != y:
-                            raw_pairs[draw[x]][draw[y]] += 1
+                for i in range(len(draw)):
+                    for j in range(len(draw)):
+                        if i != j:
+                            raw_pairs[draw[i]][draw[j]] += 1
             
             for num, partners in raw_pairs.items():
                 sorted_partners = sorted(partners.items(), key=lambda item: item[1], reverse=True)
@@ -319,16 +303,14 @@
             
             cold_str = "  ".join([f"{int(x):02d}" for x in sorted(cold_pool[:7])]) 
             hot_str = "  ".join([f"{int(x):02d}" for x in sorted(hot_pool[:7])]) 
-            overdue_str = "  ".join([f"{int(x):02d}" for x in sorted(overdue_pool)]) if overdue_pool else "אין כרגע"
             
+            # עדכון הטקסט בדשבורד ל-153
             dash.innerHTML = f"""
-                נסרקו <b>{len(df)}</b> הגרלות (מבוסס על 100 האחרונות).<br><br>
-                * המספרים הקרים ביותר:<br>
-                <b>{cold_str}</b><br>
-                * המספרים החמים ביותר:<br>
-                <b class="hot-nums">{hot_str}</b><br>
-                * ⚡ מספרים "חייבים" (עפ"י דילוגים):<br>
-                <b class="overdue-nums">{overdue_str}</b>
+                נסרקו <b>{len(df)}</b> הגרלות (ניתוח מומנטום מבוצע על 153 האחרונות).<br><br>
+                * המספרים הקרים ביותר בחלון הזמן:<br>
+                <b>{cold_str}</b><br><br>
+                * המספרים החמים ביותר בחלון הזמן:<br>
+                <b class="hot-nums">{hot_str}</b>
             """
 
         except Exception as e:
@@ -340,23 +322,23 @@
         js.document.getElementById("controls").style.display = "flex"
         js.document.getElementById("footer-area").style.display = "flex"
 
-        def get_ultimate_ticket(strategy, num_count, index):
+        def get_cluster_ticket(strategy, num_count, index):
             if strategy == "human":
                 pool = cold_pool
-                name = "התנהגות בני אדם 🧠"
+                name = "התנהגות בני אדם 🧠 (ניתוח להקות)"
                 cls = "circle-human"
             elif strategy == "machine":
                 pool = hot_pool
-                name = "התנהגות מכונה ⚙️"
+                name = "התנהגות מכונה ⚙️ (ניתוח להקות)"
                 cls = "circle-machine"
             else:
                 if index % 2 == 0:
                     pool = cold_pool
-                    name = "שילוב מערכות 🧠"
+                    name = "התנהגות בני אדם 🧠 (ניתוח להקות)"
                     cls = "circle-human"
                 else:
                     pool = hot_pool
-                    name = "שילוב מערכות ⚙️"
+                    name = "התנהגות מכונה ⚙️ (ניתוח להקות)"
                     cls = "circle-machine"
             
             available_pool = [int(x) for x in pool if 1 <= x <= 70]
@@ -368,19 +350,9 @@
                         available_pool.append(n)
             
             ticket = set()
+            first_num = random.choice(available_pool[:15]) if len(available_pool) >= 15 else random.choice(available_pool)
+            ticket.add(int(first_num))
             
-            # שלב א': הזרקת מספרים מתוך "תורת הפערים"
-            if overdue_pool:
-                num_overdue = min(len(overdue_pool), random.choice([1, 2]))
-                picked_overdue = random.sample(overdue_pool, num_overdue)
-                for n in picked_overdue:
-                    ticket.add(int(n))
-                    
-            if not ticket:
-                first_num = random.choice(available_pool[:15]) if len(available_pool) >= 15 else random.choice(available_pool)
-                ticket.add(int(first_num))
-            
-            # שלב ב': השלמת הטופס עפ"י "תורת הלהקות"
             while len(ticket) < num_count:
                 partner_found = False
                 current_num = random.choice(list(ticket))
@@ -388,7 +360,7 @@
                 if current_num in pair_partners:
                     for partner in pair_partners[current_num]:
                         if partner in available_pool and partner not in ticket:
-                            if random.random() < 0.80: # 80% סיכוי להצמיד את הלהקה
+                            if random.random() < 0.75:
                                 ticket.add(int(partner))
                                 partner_found = True
                                 break
@@ -413,7 +385,7 @@
             html = ""
             
             for i in range(num_houses):
-                ticket, name, circle_class = get_ultimate_ticket(strategy, num_per_ticket, i)
+                ticket, name, circle_class = get_cluster_ticket(strategy, num_per_ticket, i)
                 nums_html = "".join([f'<div class="num-circle {circle_class}">{int(num):02d}</div>' for num in ticket])
                 
                 html += f'''
