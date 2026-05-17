@@ -13,6 +13,7 @@
             --bg: #0a0a0a;
             --card-bg: #1a1a1a;
             --text: #ffffff;
+            --alert: #ffb300; /* צבע אזהרה למספרים שחייבים לצאת */
         }
         body { 
             background-color: var(--bg); 
@@ -52,8 +53,8 @@
             text-decoration: none;
             color: #fff;
             border-radius: 8px;
-            font-weight: 900;
-            font-size: 20px;
+            font-weight: 900; 
+            font-size: 20px; 
             border: 1px solid #444;
             transition: background 0.3s;
         }
@@ -78,6 +79,7 @@
         }
         #dashboard b { color: var(--primary); font-size: 16px;}
         #dashboard .hot-nums { color: #ff5252; }
+        #dashboard .overdue-nums { color: var(--alert); } /* עיצוב למספרים המאחרים */
         
         .controls-wrapper {
             background: var(--card-bg);
@@ -141,7 +143,7 @@
             align-items: center;
             gap: 5px; 
             background-color: var(--card-bg); 
-            flex-wrap: wrap; /* מאפשר למספרים בשיטות גדולות לרדת שורה במידת הצורך */
+            flex-wrap: wrap; 
         }
         
         .num-circle {
@@ -154,10 +156,10 @@
             font-weight: bold;
             font-size: 18px;
             color: #fff;
-            border: 2px solid #ffffff;
+            border: 2px solid #ffffff; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.6);
             flex-shrink: 0; 
-            margin: 2px;
+            margin: 3px;
         }
 
         .circle-human { background-color: #6a1b9a; }
@@ -169,7 +171,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            display: none;
+            display: none; 
         }
         .disclaimer-box {
             border: 1px solid #444;
@@ -226,9 +228,9 @@
             <div class="select-group">
                 <label>אסטרטגיה:</label>
                 <select id="strategy-select">
-                    <option value="both">שילוב (אדם + מכונה)</option>
-                    <option value="human">התנהגות בני אדם בלבד</option>
-                    <option value="machine">התנהגות מכונה בלבד</option>
+                    <option value="both">שילוב התיאוריות (פערים + להקות)</option>
+                    <option value="human">התנהגות בני אדם (קרים + להקות)</option>
+                    <option value="machine">התנהגות מכונה (חמים + להקות)</option>
                 </select>
             </div>
 
@@ -264,12 +266,22 @@
         import random
         from pyodide.http import open_url
         import js
+        from collections import defaultdict
 
         sheet_url = "https://docs.google.com/spreadsheets/d/1XDrGrOuNIQCLodDkIIGEykF1JlGAU4mmv2m12cMMSNw/export?format=csv&gid=125193362"
         
+        cold_pool = []
+        hot_pool = []
+        pair_partners = {}
+        overdue_pool = []
+
         try:
             df = pd.read_csv(open_url(sheet_url))
-            nums_df = df.iloc[:, 2:19]
+            
+            # 1. חלון מומנטום: עודכן ל-210 הגרלות אחרונות בדיוק כמו שביקשת
+            recent_df = df.head(210)
+            
+            nums_df = recent_df.iloc[:, 2:19]
             all_nums = nums_df.values.flatten()
             all_nums = [n for n in all_nums if not pd.isna(n)]
             
@@ -277,21 +289,50 @@
             cold_pool = counts.sort_values(ascending=True).head(28).index.tolist()
             hot_pool = counts.sort_values(ascending=False).head(28).index.tolist()
             
+            # 2. תורת הפערים: מציאת מספרים ש"חייבים לצאת" (Gap >= 7)
+            gaps = {n: 210 for n in range(1, 71)}
+            for i in range(len(recent_df)):
+                row = recent_df.iloc[i]
+                draw = [int(x) for x in row.iloc[2:19].dropna().values if 1 <= x <= 70]
+                for num in draw:
+                    if i < gaps[num]:
+                        gaps[num] = i
+                        
+            overdue_pool = [n for n, gap in gaps.items() if gap >= 7]
+            
+            # 3. תורת הלהקות: מיפוי קשרים וצמדים
+            raw_pairs = defaultdict(lambda: defaultdict(int))
+            for i in range(len(recent_df)):
+                row = recent_df.iloc[i]
+                draw = [int(x) for x in row.iloc[2:19].dropna().values if 1 <= x <= 70]
+                for x in range(len(draw)):
+                    for y in range(len(draw)):
+                        if x != y:
+                            raw_pairs[draw[x]][draw[y]] += 1
+            
+            for num, partners in raw_pairs.items():
+                sorted_partners = sorted(partners.items(), key=lambda item: item[1], reverse=True)
+                pair_partners[num] = [p[0] for p in sorted_partners]
+            
             dash = js.document.getElementById("dashboard")
             dash.style.display = "block"
             
             cold_str = "  ".join([f"{int(x):02d}" for x in sorted(cold_pool[:7])]) 
             hot_str = "  ".join([f"{int(x):02d}" for x in sorted(hot_pool[:7])]) 
+            overdue_str = "  ".join([f"{int(x):02d}" for x in sorted(overdue_pool)]) if overdue_pool else "אין כרגע"
             
             dash.innerHTML = f"""
-                נסרקו <b>{len(df)}</b> הגרלות 777.<br><br>
-                * המספרים הקרים ביותר ב-777:<br>
-                <b>{cold_str}</b><br><br>
-                * המספרים החמים ביותר ב-777:<br>
-                <b class="hot-nums">{hot_str}</b>
+                נסרקו <b>{len(df)}</b> הגרלות (ניתוח מומנטום מבוצע על 210 האחרונות).<br><br>
+                * המספרים הקרים ביותר:<br>
+                <b>{cold_str}</b><br>
+                * המספרים החמים ביותר:<br>
+                <b class="hot-nums">{hot_str}</b><br>
+                * ⚡ מספרים "חייבים" (עפ"י דילוגים):<br>
+                <b class="overdue-nums">{overdue_str}</b>
             """
 
-        except Exception:
+        except Exception as e:
+            js.console.log(f"Error loading data: {str(e)}")
             cold_pool = list(range(1, 71))
             hot_pool = list(range(1, 71))
 
@@ -299,35 +340,68 @@
         js.document.getElementById("controls").style.display = "flex"
         js.document.getElementById("footer-area").style.display = "flex"
 
-        def get_ticket(strategy, num_count, index):
-            # בחירת הפול לפי אסטרטגיה
+        def get_ultimate_ticket(strategy, num_count, index):
             if strategy == "human":
                 pool = cold_pool
-                name = "התנהגות בני אדם 🧠"
+                name = "התנהגות בני אדם 🧠 (ניתוח להקות)"
                 cls = "circle-human"
             elif strategy == "machine":
                 pool = hot_pool
-                name = "התנהגות מכונה ⚙️"
+                name = "התנהגות מכונה ⚙️ (ניתוח להקות)"
                 cls = "circle-machine"
-            else: # שילוב
+            else:
                 if index % 2 == 0:
                     pool = cold_pool
-                    name = "התנהגות בני אדם 🧠"
+                    name = "התנהגות בני אדם 🧠 (ניתוח להקות)"
                     cls = "circle-human"
                 else:
                     pool = hot_pool
-                    name = "התנהגות מכונה ⚙️"
+                    name = "התנהגות מכונה ⚙️ (ניתוח להקות)"
                     cls = "circle-machine"
             
-            # אם הפול קטן מדי, נשלים מהגרלה כללית
-            full_pool = list(pool)
-            if len(full_pool) < num_count:
-                remaining = list(set(range(1, 71)) - set(full_pool))
-                full_pool += random.sample(remaining, num_count - len(full_pool))
+            available_pool = [int(x) for x in pool if 1 <= x <= 70]
+            if len(available_pool) < num_count:
+                all_possible = list(range(1, 71))
+                random.shuffle(all_possible)
+                for n in all_possible:
+                    if n not in available_pool:
+                        available_pool.append(n)
             
-            ticket = random.sample(full_pool, num_count)
-            ticket.sort()
-            return ticket, name, cls
+            ticket = set()
+            
+            # שלב א': הזרקת מספרים מתוך "תורת הפערים"
+            if overdue_pool:
+                num_overdue = min(len(overdue_pool), random.choice([1, 2]))
+                picked_overdue = random.sample(overdue_pool, num_overdue)
+                for n in picked_overdue:
+                    ticket.add(int(n))
+                    
+            if not ticket:
+                first_num = random.choice(available_pool[:15]) if len(available_pool) >= 15 else random.choice(available_pool)
+                ticket.add(int(first_num))
+            
+            # שלב ב': השלמת הטופס עפ"י "תורת הלהקות"
+            while len(ticket) < num_count:
+                partner_found = False
+                current_num = random.choice(list(ticket))
+                
+                if current_num in pair_partners:
+                    for partner in pair_partners[current_num]:
+                        if partner in available_pool and partner not in ticket:
+                            if random.random() < 0.80: # 80% סיכוי להצמיד את הלהקה
+                                ticket.add(int(partner))
+                                partner_found = True
+                                break
+                
+                if not partner_found:
+                    rem = [x for x in available_pool if x not in ticket]
+                    if rem:
+                        ticket.add(int(random.choice(rem)))
+                    else:
+                        break
+            
+            sorted_ticket = sorted(list(ticket))
+            return sorted_ticket, name, cls
 
         def generate_and_display(event=None):
             num_houses = int(js.document.getElementById("house-count").value)
@@ -339,7 +413,7 @@
             html = ""
             
             for i in range(num_houses):
-                ticket, name, circle_class = get_ticket(strategy, num_per_ticket, i)
+                ticket, name, circle_class = get_ultimate_ticket(strategy, num_per_ticket, i)
                 nums_html = "".join([f'<div class="num-circle {circle_class}">{int(num):02d}</div>' for num in ticket])
                 
                 html += f'''
