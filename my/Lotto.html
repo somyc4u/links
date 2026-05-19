@@ -307,8 +307,8 @@
         try:
             df = pd.read_csv(open_url(sheet_url))
             
-            # העדכון המבוקש ל-222 הגרלות אחרונות
-            recent_df = df.head(222)
+            # העדכון המבוקש ל-111 הגרלות אחרונות לניתוח הלוטו
+            recent_df = df.head(111)
             
             nums_df = recent_df.iloc[:, 2:8]
             all_nums = nums_df.values.flatten()
@@ -325,8 +325,8 @@
             strong_hot = strong_counts.sort_values(ascending=False).head(4).index.tolist()
             strong_cold = strong_counts.sort_values(ascending=True).head(4).index.tolist()
             
-            # תורת הפערים מעודכנת ל-222
-            gaps = {n: 222 for n in range(1, 38)}
+            # תורת הפערים ללוטו: מס' שלא יצאו לאחרונה מעודכנת ל-111
+            gaps = {n: 111 for n in range(1, 38)}
             for i in range(len(recent_df)):
                 row = recent_df.iloc[i]
                 draw = [int(x) for x in row.iloc[2:8].dropna().values if 1 <= x <= 37]
@@ -358,7 +358,7 @@
             overdue_str = "  ".join([f"{int(x):02d}" for x in sorted(overdue_pool)]) if overdue_pool else "אין כרגע"
             
             dash.innerHTML = f"""
-                נסרקו <b>{len(df)}</b> הגרלות (מבוסס על 222 האחרונות).<br><br>
+                נסרקו <b>{len(df)}</b> הגרלות (מבוסס על 111 האחרונות).<br><br>
                 * המספרים הקרים ביותר:<br>
                 <b>{cold_str}</b><br>
                 * המספרים החמים ביותר:<br>
@@ -391,23 +391,23 @@
             if strategy == "human":
                 pool = cold_pool
                 s_pool = strong_cold
-                name = "התנהגות בני אדם 🧠"
+                name = "התנהגות בני אדם 🧠 (ניתוח להקות)"
                 cls = "circle-human"
             elif strategy == "machine":
                 pool = hot_pool
                 s_pool = strong_hot
-                name = "התנהגות מכונה ⚙️"
+                name = "התנהגות מכונה ⚙️ (ניתוח להקות)"
                 cls = "circle-machine"
             else:
                 if index % 2 == 0:
                     pool = cold_pool
                     s_pool = strong_cold
-                    name = "שילוב מערכות 🧠"
+                    name = "שילוב התיאוריות (פערים + להקות) 🧠"
                     cls = "circle-human"
                 else:
                     pool = hot_pool
                     s_pool = strong_hot
-                    name = "שילוב מערכות ⚙️"
+                    name = "שילוב התיאוריות (פערים + להקות) ⚙️"
                     cls = "circle-machine"
             
             available_pool = [int(x) for x in pool if 1 <= x <= 37]
