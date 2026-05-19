@@ -148,8 +148,7 @@
             align-items: center;
             gap: 5px; 
             background-color: var(--card-bg); 
-            flex-wrap: nowrap; 
-            overflow-x: auto; 
+            flex-wrap: wrap; /* שונה ל-wrap כדי לאפשר תמיכה במספרים מרובים של שיטתי */
         }
         
         .house-numbers {
@@ -157,6 +156,7 @@
             gap: 5px; 
             justify-content: center;
             align-items: center;
+            flex-wrap: wrap; /* תמיכה בשבירת שורות בשיטתי גדול */
         }
         
         .num-circle {
@@ -172,6 +172,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.6), inset 0 0 5px rgba(255,255,255,0.3);
             border: 2px solid #ffffff; 
             flex-shrink: 0; 
+            margin: 2px;
         }
 
         .circle-human { background-color: #6a1b9a; }
@@ -192,6 +193,7 @@
             flex-shrink: 0; 
             border: 2px solid #ffffff; 
             margin-right: 6px; 
+            margin-top: 2px;
         }
         
         .footer-container {
@@ -252,6 +254,7 @@
             <div class="select-group">
                 <label>כמות בתים:</label>
                 <select id="house-count">
+                    <option value="1">1 בתים</option>
                     <option value="2">2 בתים</option>
                     <option value="4">4 בתים</option>
                     <option value="6">6 בתים</option>
@@ -268,6 +271,18 @@
                     <option value="both">שילוב התיאוריות (פערים + להקות)</option>
                     <option value="human">התנהגות בני אדם (קרים + להקות)</option>
                     <option value="machine">התנהגות מכונה (חמים + להקות)</option>
+                </select>
+            </div>
+
+            <div class="select-group">
+                <label>בחר שיטה:</label>
+                <select id="method-select">
+                    <option value="6" selected>לוטו רגיל - 6</option>
+                    <option value="8">לוטו שיטתי - 8</option>
+                    <option value="9">לוטו שיטתי - 9</option>
+                    <option value="10">לוטו שיטתי - 10</option>
+                    <option value="11">לוטו שיטתי - 11</option>
+                    <option value="12">לוטו שיטתי - 12</option>
                 </select>
             </div>
         </div>
@@ -307,8 +322,7 @@
         try:
             df = pd.read_csv(open_url(sheet_url))
             
-            # העדכון המבוקש ל-222 הגרלות אחרונות
-            recent_df = df.head(222)
+            recent_df = df.head(111)
             
             nums_df = recent_df.iloc[:, 2:8]
             all_nums = nums_df.values.flatten()
@@ -325,8 +339,7 @@
             strong_hot = strong_counts.sort_values(ascending=False).head(4).index.tolist()
             strong_cold = strong_counts.sort_values(ascending=True).head(4).index.tolist()
             
-            # תורת הפערים מעודכנת ל-222
-            gaps = {n: 222 for n in range(1, 38)}
+            gaps = {n: 111 for n in range(1, 38)}
             for i in range(len(recent_df)):
                 row = recent_df.iloc[i]
                 draw = [int(x) for x in row.iloc[2:8].dropna().values if 1 <= x <= 37]
@@ -334,9 +347,8 @@
                     if i < gaps[num]:
                         gaps[num] = i
                         
-            overdue_pool = [n for n, gap in gaps.items() if gap >= 15] # דילוג של 15
+            overdue_pool = [n for n, gap in gaps.items() if gap >= 15]
             
-            # תורת הלהקות ללוטו
             raw_pairs = defaultdict(lambda: defaultdict(int))
             for i in range(len(recent_df)):
                 row = recent_df.iloc[i]
@@ -357,11 +369,12 @@
             hot_str = "  ".join([f"{int(x):02d}" for x in sorted(hot_pool[:6])]) 
             overdue_str = "  ".join([f"{int(x):02d}" for x in sorted(overdue_pool)]) if overdue_pool else "אין כרגע"
             
+            # עדכון השורות בדשבורד לפי בקשתך המדויקת
             dash.innerHTML = f"""
-                נסרקו <b>{len(df)}</b> הגרלות (מבוסס על 222 האחרונות).<br><br>
-                * המספרים הקרים ביותר:<br>
+                נסרקו <b>{len(df)}</b> הגרלות (מבוסס על 111 האחרונות).<br><br>
+                * המספרים הקרים ביותר (התנהגות אנושית):<br>
                 <b>{cold_str}</b><br>
-                * המספרים החמים ביותר:<br>
+                * המספרים החמים ביותר (התנהגות מכונה):<br>
                 <b class="hot-nums">{hot_str}</b><br>
                 * ⚡ מספרים רגילים "חייבים" (עפ"י דילוגים):<br>
                 <b class="overdue-nums">{overdue_str}</b>
@@ -387,31 +400,31 @@
                 else: consecutive = 0
             return False
 
-        def get_ultimate_lotto_ticket(strategy, index):
+        def get_ultimate_lotto_ticket(strategy, num_count, index):
             if strategy == "human":
                 pool = cold_pool
                 s_pool = strong_cold
-                name = "התנהגות בני אדם 🧠"
+                name = "התנהגות בני אדם 🧠 (ניתוח להקות)"
                 cls = "circle-human"
             elif strategy == "machine":
                 pool = hot_pool
                 s_pool = strong_hot
-                name = "התנהגות מכונה ⚙️"
+                name = "התנהגות מכונה ⚙️ (ניתוח להקות)"
                 cls = "circle-machine"
             else:
                 if index % 2 == 0:
                     pool = cold_pool
                     s_pool = strong_cold
-                    name = "שילוב מערכות 🧠"
+                    name = "שילוב התיאוריות (פערים + להקות) 🧠"
                     cls = "circle-human"
                 else:
                     pool = hot_pool
                     s_pool = strong_hot
-                    name = "שילוב מערכות ⚙️"
+                    name = "שילוב התיאוריות (פערים + להקות) ⚙️"
                     cls = "circle-machine"
             
             available_pool = [int(x) for x in pool if 1 <= x <= 37]
-            if len(available_pool) < 6:
+            if len(available_pool) < num_count:
                 all_possible = list(range(1, 38))
                 random.shuffle(all_possible)
                 for n in all_possible:
@@ -431,9 +444,9 @@
                 first_num = random.choice(available_pool[:10]) if len(available_pool) >= 10 else random.choice(available_pool)
                 ticket.add(int(first_num))
             
-            # שלב ב': תורת הלהקות והגבלות
+            # שלב ב': תורת הלהקות והגבלות (דינמי לפי כמות מספרים שנבחרה)
             attempts = 0
-            while len(ticket) < 6 and attempts < 50:
+            while len(ticket) < num_count and attempts < 50:
                 partner_found = False
                 current_num = random.choice(list(ticket))
                 
@@ -457,7 +470,7 @@
                 attempts += 1
             
             # השלמה במקרה שהלולאה נתקעה
-            while len(ticket) < 6:
+            while len(ticket) < num_count:
                 rem = [x for x in available_pool if x not in ticket]
                 if not rem: rem = [x for x in range(1, 38) if x not in ticket]
                 ticket.add(int(random.choice(rem)))
@@ -470,12 +483,13 @@
         def generate_and_display(event=None):
             num_houses = int(js.document.getElementById("house-count").value)
             strat = js.document.getElementById("strategy-select").value
+            num_per_ticket = int(js.document.getElementById("method-select").value) # קריאת השיטה שנבחרה (כמות המספרים)
             output_div = js.document.getElementById("output")
             output_div.innerHTML = ""
             html = ""
             
             for i in range(num_houses):
-                t, s, name, circle_class = get_ultimate_lotto_ticket(strat, i)
+                t, s, name, circle_class = get_ultimate_lotto_ticket(strat, num_per_ticket, i)
                 
                 nums_html = "".join([f'<div class="num-circle {circle_class}">{int(num):02d}</div>' for num in t])
                 strong_html = f'<div class="house-strong-circle">{s}</div>'
