@@ -148,7 +148,7 @@
             align-items: center;
             gap: 5px; 
             background-color: var(--card-bg); 
-            flex-wrap: wrap; /* שונה ל-wrap כדי לאפשר תמיכה במספרים מרובים של שיטתי */
+            flex-wrap: wrap; 
         }
         
         .house-numbers {
@@ -156,7 +156,7 @@
             gap: 5px; 
             justify-content: center;
             align-items: center;
-            flex-wrap: wrap; /* תמיכה בשבירת שורות בשיטתי גדול */
+            flex-wrap: wrap; 
         }
         
         .num-circle {
@@ -322,7 +322,7 @@
         try:
             df = pd.read_csv(open_url(sheet_url))
             
-            recent_df = df.head(111)
+            recent_df = df.head(130)
             
             nums_df = recent_df.iloc[:, 2:8]
             all_nums = nums_df.values.flatten()
@@ -339,7 +339,7 @@
             strong_hot = strong_counts.sort_values(ascending=False).head(4).index.tolist()
             strong_cold = strong_counts.sort_values(ascending=True).head(4).index.tolist()
             
-            gaps = {n: 111 for n in range(1, 38)}
+            gaps = {n: 130 for n in range(1, 38)}
             for i in range(len(recent_df)):
                 row = recent_df.iloc[i]
                 draw = [int(x) for x in row.iloc[2:8].dropna().values if 1 <= x <= 37]
@@ -369,9 +369,8 @@
             hot_str = "  ".join([f"{int(x):02d}" for x in sorted(hot_pool[:6])]) 
             overdue_str = "  ".join([f"{int(x):02d}" for x in sorted(overdue_pool)]) if overdue_pool else "אין כרגע"
             
-            # עדכון השורות בדשבורד לפי בקשתך המדויקת
             dash.innerHTML = f"""
-                נסרקו <b>{len(df)}</b> הגרלות (מבוסס על 111 האחרונות).<br><br>
+                נסרקו <b>{len(df)}</b> הגרלות (מבוסס על 130 האחרונות).<br><br>
                 * המספרים הקרים ביותר (התנהגות אנושית):<br>
                 <b>{cold_str}</b><br>
                 * המספרים החמים ביותר (התנהגות מכונה):<br>
@@ -483,7 +482,7 @@
         def generate_and_display(event=None):
             num_houses = int(js.document.getElementById("house-count").value)
             strat = js.document.getElementById("strategy-select").value
-            num_per_ticket = int(js.document.getElementById("method-select").value) # קריאת השיטה שנבחרה (כמות המספרים)
+            num_per_ticket = int(js.document.getElementById("method-select").value)
             output_div = js.document.getElementById("output")
             output_div.innerHTML = ""
             html = ""
