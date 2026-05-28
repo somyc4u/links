@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מנוע הזאב הבודד PRO</title>
+    <title>מנוע הזאב הבודד PRO - תורת המספרים</title>
     <link rel="stylesheet" href="https://pyscript.net/releases/2023.11.1/core.css" />
     <script type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
     <style>
@@ -13,7 +13,7 @@
             --bg: #0a0a0a;
             --card-bg: #1a1a1a;
             --text: #ffffff;
-            --alert: #ffb300; /* צבע אזהרה למספרים מאחרים */
+            --alert: #ffb300; 
         }
         body { 
             background-color: var(--bg); 
@@ -78,8 +78,6 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
         #dashboard b { color: var(--secondary); font-size: 16px;}
-        #dashboard .hot-nums { color: #ff5252; }
-        #dashboard .overdue-nums { color: var(--alert); }
         
         .controls-wrapper {
             background: var(--card-bg);
@@ -244,12 +242,12 @@
             <a href="777.html" class="btn-nav nav-777">טפסי 777</a>
         </div>
 
-        <div id="loading-msg">טוען מערכת... מתחבר למאגר נתונים ומבצע חישובים אסטרטגיים... אנא המתן.</div>
+        <div id="loading-msg">מפעיל מנוע קומבינטורי ואלגוריתם תורת המספרים...</div>
 
         <div id="dashboard"></div>
 
         <div id="controls" class="controls-wrapper">
-            <button id="generate-btn" class="btn-refresh" py-click="generate_and_display">רענן מספרי לוטו</button>
+            <button id="generate-btn" class="btn-refresh" py-click="generate_and_display">רענן מספרי לוטו (Math)</button>
             
             <div class="select-group">
                 <label>כמות בתים:</label>
@@ -268,9 +266,9 @@
             <div class="select-group">
                 <label>אסטרטגיה:</label>
                 <select id="strategy-select">
-                    <option value="both">שילוב התיאוריות (פערים + להקות)</option>
-                    <option value="human">התנהגות בני אדם (קרים + להקות)</option>
-                    <option value="machine">התנהגות מכונה (חמים + להקות)</option>
+                    <option value="math_perfect">פעמון גאוס (איזון מושלם)</option>
+                    <option value="math_high">אנטי-תאריכים (נטייה לגבוהים)</option>
+                    <option value="math_spread">שיטת הדלתא (פיזור מקסימלי)</option>
                 </select>
             </div>
 
@@ -291,7 +289,7 @@
 
         <div id="footer-area" class="footer-container">
             <div class="disclaimer-box">
-                <b>הסרת אחריות:</b> התוצאות והמספרים המופקים באתר "הזאב הבודד" מבוססים על ניתוח סטטיסטי בלבד ואינם מהווים המלצה, הבטחה או ערובה לזכייה מכל סוג שהוא. ההשתתפות בהגרלות הלוטו היא על אחריות המשתמש בלבד. הנהלת האתר אינה נושאת בשום אחריות לכל אובדן, הפסד כספי, נזק ישיר או עקיף שייגרם כתוצאה משימוש במידע המופיע במערכת. ט.ל.ח.
+                <b>הסרת אחריות:</b> התוצאות מופקות על בסיס חוקיות "תורת המספרים" ונועדו לייצר פיזור אופטימלי וסטטיסטי. אין לראות בהן המלצה או ערובה לזכייה. ההשתתפות בהגרלות הלוטו היא על אחריות המשתמש בלבד.
             </div>
             <div class="copyright">
                 © 2026 כל הזכויות שמורות לאתר "הזאב הבודד" - שמעון (שימי)
@@ -299,196 +297,89 @@
         </div>
     </div>
 
-    <py-config>
-        packages = ["pandas"]
-    </py-config>
-
     <script type="py">
-        import pandas as pd
         import random
-        from pyodide.http import open_url
         import js
-        from collections import defaultdict
 
-        sheet_url = "https://docs.google.com/spreadsheets/d/1XDrGrOuNIQCLodDkIIGEykF1JlGAU4mmv2m12cMMSNw/export?format=csv&gid=0"
-        
-        cold_pool = []
-        hot_pool = []
-        pair_partners = {}
-        overdue_pool = []
-        strong_hot = []
-        strong_cold = []
-
-        try:
-            df = pd.read_csv(open_url(sheet_url))
-            
-            recent_df = df.head(37)
-            
-            nums_df = recent_df.iloc[:, 2:8]
-            all_nums = nums_df.values.flatten()
-            all_nums = [n for n in all_nums if not pd.isna(n)]
-            
-            strong_df = recent_df.iloc[:, 8]
-            all_strong = [n for n in strong_df.values if not pd.isna(n)]
-            
-            counts = pd.Series(all_nums).value_counts()
-            cold_pool = counts.sort_values(ascending=True).head(15).index.tolist()
-            hot_pool = counts.sort_values(ascending=False).head(15).index.tolist()
-            
-            strong_counts = pd.Series(all_strong).value_counts()
-            strong_hot = strong_counts.sort_values(ascending=False).head(4).index.tolist()
-            strong_cold = strong_counts.sort_values(ascending=True).head(4).index.tolist()
-            
-            gaps = {n: 37 for n in range(1, 38)}
-            for i in range(len(recent_df)):
-                row = recent_df.iloc[i]
-                draw = [int(x) for x in row.iloc[2:8].dropna().values if 1 <= x <= 37]
-                for num in draw:
-                    if i < gaps[num]:
-                        gaps[num] = i
-                        
-            overdue_pool = [n for n, gap in gaps.items() if gap >= 15]
-            
-            raw_pairs = defaultdict(lambda: defaultdict(int))
-            for i in range(len(recent_df)):
-                row = recent_df.iloc[i]
-                draw = [int(x) for x in row.iloc[2:8].dropna().values if 1 <= x <= 37]
-                for x in range(len(draw)):
-                    for y in range(len(draw)):
-                        if x != y:
-                            raw_pairs[draw[x]][draw[y]] += 1
-            
-            for num, partners in raw_pairs.items():
-                sorted_partners = sorted(partners.items(), key=lambda item: item[1], reverse=True)
-                pair_partners[num] = [p[0] for p in sorted_partners]
-            
-            dash = js.document.getElementById("dashboard")
-            dash.style.display = "block"
-            
-            cold_str = "  ".join([f"{int(x):02d}" for x in sorted(cold_pool[:6])]) 
-            hot_str = "  ".join([f"{int(x):02d}" for x in sorted(hot_pool[:6])]) 
-            overdue_str = "  ".join([f"{int(x):02d}" for x in sorted(overdue_pool)]) if overdue_pool else "אין כרגע"
-            
-            dash.innerHTML = f"""
-                נסרקו <b>{len(df)}</b> הגרלות (מבוסס על 37 האחרונות).<br><br>
-                * המספרים הקרים ביותר (התנהגות אנושית):<br>
-                <b>{cold_str}</b><br>
-                * המספרים החמים ביותר (התנהגות מכונה):<br>
-                <b class="hot-nums">{hot_str}</b><br>
-                * ⚡ מספרים רגילים "חייבים" (עפ"י דילוגים):<br>
-                <b class="overdue-nums">{overdue_str}</b>
-            """
-
-        except Exception as e:
-            js.console.log(f"Error loading data: {str(e)}")
-            cold_pool = list(range(1, 38))
-            hot_pool = list(range(1, 38))
-            strong_hot = list(range(1, 8))
-            strong_cold = list(range(1, 8))
+        # אתחול המערכת ללא צורך בטעינת קבצים רשתיים כבדים
+        dash = js.document.getElementById("dashboard")
+        dash.style.display = "block"
+        dash.innerHTML = f"""
+            <b>ברוך הבא למנוע "תורת המספרים" (Number Theory)! 📐</b><br><br>
+            המערכת עברה בהצלחה למודל קומבינטורי טהור. אלגוריתם הליבה מתחשב כעת ב:<br>
+            * <b>איזון סכומים:</b> חיתוך לפי טווח עקומת הפעמון.<br>
+            * <b>יחסים:</b> שיווי משקל בין זוגי/אי-זוגי וגבוה/נמוך.<br>
+            * <b>הדלתא:</b> אבטחת מרווחים למניעת רצפים חריגים.<br>
+            <i>מנגנון "הזאב הבודד" פעיל - נועד למקסם זכייה יחידה.</i>
+        """
 
         js.document.getElementById("loading-msg").style.display = "none"
         js.document.getElementById("controls").style.display = "flex"
         js.document.getElementById("footer-area").style.display = "flex"
 
-        def is_too_human(ticket):
-            consecutive = 0
-            for i in range(len(ticket)-1):
-                if ticket[i+1] == ticket[i] + 1:
-                    consecutive += 1
-                    if consecutive >= 2: return True
-                else: consecutive = 0
-            return False
-
-        def get_ultimate_lotto_ticket(strategy, num_count, index):
-            if strategy == "human":
-                pool = cold_pool
-                s_pool = strong_cold
-                name = "התנהגות בני אדם 🧠 (ניתוח להקות)"
-                cls = "circle-human"
-            elif strategy == "machine":
-                pool = hot_pool
-                s_pool = strong_hot
-                name = "התנהגות מכונה ⚙️ (ניתוח להקות)"
-                cls = "circle-machine"
-            else:
-                if index % 2 == 0:
-                    pool = cold_pool
-                    s_pool = strong_cold
-                    name = "שילוב התיאוריות (פערים + להקות) 🧠"
-                    cls = "circle-human"
-                else:
-                    pool = hot_pool
-                    s_pool = strong_hot
-                    name = "שילוב התיאוריות (פערים + להקות) ⚙️"
-                    cls = "circle-machine"
-            
-            available_pool = [int(x) for x in pool if 1 <= x <= 37]
-            if len(available_pool) < num_count:
-                all_possible = list(range(1, 38))
-                random.shuffle(all_possible)
-                for n in all_possible:
-                    if n not in available_pool:
-                        available_pool.append(n)
-            
-            ticket = set()
-            
-            # שלב א': תורת הפערים
-            if overdue_pool:
-                num_overdue = min(len(overdue_pool), 1)
-                picked_overdue = random.sample(overdue_pool, num_overdue)
-                for n in picked_overdue:
-                    ticket.add(int(n))
-                    
-            if not ticket:
-                first_num = random.choice(available_pool[:10]) if len(available_pool) >= 10 else random.choice(available_pool)
-                ticket.add(int(first_num))
-            
-            # שלב ב': תורת הלהקות והגבלות (דינמי לפי כמות מספרים שנבחרה)
+        def get_math_ticket(strategy, num_count):
             attempts = 0
-            while len(ticket) < num_count and attempts < 50:
-                partner_found = False
-                current_num = random.choice(list(ticket))
-                
-                if current_num in pair_partners:
-                    for partner in pair_partners[current_num]:
-                        if partner in available_pool and partner not in ticket:
-                            if random.random() < 0.70:
-                                temp_ticket = sorted(list(ticket) + [int(partner)])
-                                if not is_too_human(temp_ticket):
-                                    ticket.add(int(partner))
-                                    partner_found = True
-                                    break
-                
-                if not partner_found:
-                    rem = [x for x in available_pool if x not in ticket]
-                    if rem:
-                        candidate = int(random.choice(rem))
-                        temp_ticket = sorted(list(ticket) + [candidate])
-                        if not is_too_human(temp_ticket):
-                            ticket.add(candidate)
+            while attempts < 10000:
                 attempts += 1
-            
-            # השלמה במקרה שהלולאה נתקעה
-            while len(ticket) < num_count:
-                rem = [x for x in available_pool if x not in ticket]
-                if not rem: rem = [x for x in range(1, 38) if x not in ticket]
-                ticket.add(int(random.choice(rem)))
+                ticket = random.sample(range(1, 38), num_count)
+                ticket.sort()
                 
-            sorted_ticket = sorted(list(ticket))
-            strong_num = int(random.choice(s_pool)) if s_pool else random.randint(1, 7)
-            
-            return sorted_ticket, strong_num, name, cls
+                evens = sum(1 for n in ticket if n % 2 == 0)
+                odds = num_count - evens
+                highs = sum(1 for n in ticket if n > 18)
+                lows = num_count - highs
+                total_sum = sum(ticket)
+                
+                # תנאי ברזל לכל השיטות: טווח הסכומים הריאלי ביותר בלוטו
+                min_sum = int((num_count / 6.0) * 100)
+                max_sum = int((num_count / 6.0) * 165)
+                if not (min_sum <= total_sum <= max_sum):
+                    continue
+                
+                if strategy == "math_perfect":
+                    # איזון הרמוני מוחלט
+                    if abs(evens - odds) > 2: continue
+                    if abs(highs - lows) > 2: continue
+                    name = "פעמון גאוס 🔔 (איזון מושלם)"
+                    cls = "circle-human"
+                    
+                elif strategy == "math_high":
+                    # סילוק תאריכי ימי הולדת
+                    if highs <= lows: continue # דורש יותר מספרים גבוהים מנמוכים
+                    if ticket[0] < 5: continue # המספר הראשון חייב להיות מעל 4
+                    name = "אנטי-תאריכים 🛡️ (נטייה לגבוהים)"
+                    cls = "circle-machine"
+                    
+                else: # math_spread
+                    # מניעת צפיפות (מקסימום זוג צמוד אחד בלבד, לא יותר)
+                    consec_count = 0
+                    for i in range(num_count - 1):
+                        if ticket[i+1] == ticket[i] + 1:
+                            consec_count += 1
+                    if consec_count > (num_count // 4): continue
+                    name = "שיטת הדלתא 📐 (פיזור מקסימלי)"
+                    cls = "circle-machine"
+                    
+                # בחירת מספר חזק
+                strong_num = random.randint(1, 7)
+                return ticket, strong_num, name, cls
+                
+            # גיבוי במקרה חריג
+            ticket = random.sample(range(1, 38), num_count)
+            ticket.sort()
+            return ticket, random.randint(1, 7), "מערכת גיבוי מתמטית ⚙️", "circle-machine"
 
         def generate_and_display(event=None):
             num_houses = int(js.document.getElementById("house-count").value)
-            strat = js.document.getElementById("strategy-select").value
+            strategy = js.document.getElementById("strategy-select").value
             num_per_ticket = int(js.document.getElementById("method-select").value)
+            
             output_div = js.document.getElementById("output")
             output_div.innerHTML = ""
             html = ""
             
             for i in range(num_houses):
-                t, s, name, circle_class = get_ultimate_lotto_ticket(strat, num_per_ticket, i)
+                t, s, name, circle_class = get_math_ticket(strategy, num_per_ticket)
                 
                 nums_html = "".join([f'<div class="num-circle {circle_class}">{int(num):02d}</div>' for num in t])
                 strong_html = f'<div class="house-strong-circle">{s}</div>'
