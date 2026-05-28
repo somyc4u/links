@@ -238,4 +238,162 @@
         <img src="wolf-logo.png" alt="לוגו הזאב הבודד" class="main-logo" onerror="this.style.display='none'">
         
         <div class="nav-wrapper">
+            <a href="Lotto.html" class="btn-nav nav-lotto">טפסי לוטו</a>
+            <a href="777.html" class="btn-nav nav-777">טפסי 777</a>
+        </div>
+
+        <div id="loading-msg">מפעיל מנוע קומבינטורי ואלגוריתם תורת המספרים...</div>
+
+        <div id="dashboard"></div>
+
+        <div id="controls" class="controls-wrapper">
+            <button id="generate-btn" class="btn-refresh" py-click="generate_and_display">רענן מספרי לוטו (Math)</button>
             
+            <div class="select-group">
+                <label>כמות בתים:</label>
+                <select id="house-count">
+                    <option value="1">1 בתים</option>
+                    <option value="2">2 בתים</option>
+                    <option value="4">4 בתים</option>
+                    <option value="6">6 בתים</option>
+                    <option value="8">8 בתים</option>
+                    <option value="10">10 בתים</option>
+                    <option value="12">12 בתים</option>
+                    <option value="14" selected>14 בתים</option>
+                </select>
+            </div>
+
+            <div class="select-group">
+                <label>אסטרטגיה:</label>
+                <select id="strategy-select">
+                    <option value="math_perfect">פעמון גאוס (איזון מושלם)</option>
+                    <option value="math_high">אנטי-תאריכים (נטייה לגבוהים)</option>
+                    <option value="math_spread">שיטת הדלתא (פיזור מקסימלי)</option>
+                </select>
+            </div>
+
+            <div class="select-group">
+                <label>בחר שיטה:</label>
+                <select id="method-select">
+                    <option value="6" selected>לוטו רגיל - 6</option>
+                    <option value="8">לוטו שיטתי - 8</option>
+                    <option value="9">לוטו שיטתי - 9</option>
+                    <option value="10">לוטו שיטתי - 10</option>
+                    <option value="11">לוטו שיטתי - 11</option>
+                    <option value="12">לוטו שיטתי - 12</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="output"></div>
+
+        <div id="footer-area" class="footer-container">
+            <div class="disclaimer-box">
+                <b>הסרת אחריות:</b> התוצאות מופקות על בסיס חוקיות "תורת המספרים" ונועדו לייצר פיזור אופטימלי וסטטיסטי. אין לראות בהן המלצה או ערובה לזכייה. ההשתתפות בהגרלות הלוטו היא על אחריות המשתמש בלבד.
+            </div>
+            <div class="copyright">
+                © 2026 כל הזכויות שמורות לאתר "הזאב הבודד" - שמעון (שימי)
+            </div>
+        </div>
+    </div>
+
+    <script type="py">
+        import random
+        import js
+
+        # אתחול המערכת ללא צורך בטעינת קבצים רשתיים כבדים
+        dash = js.document.getElementById("dashboard")
+        dash.style.display = "block"
+        dash.innerHTML = f"""
+            <b>ברוך הבא למנוע "תורת המספרים" (Number Theory)! 📐</b><br><br>
+            המערכת עברה בהצלחה למודל קומבינטורי טהור. אלגוריתם הליבה מתחשב כעת ב:<br>
+            * <b>איזון סכומים:</b> חיתוך לפי טווח עקומת הפעמון.<br>
+            * <b>יחסים:</b> שיווי משקל בין זוגי/אי-זוגי וגבוה/נמוך.<br>
+            * <b>הדלתא:</b> אבטחת מרווחים למניעת רצפים חריגים.<br>
+            <i>מנגנון "הזאב הבודד" פעיל - נועד למקסם זכייה יחידה.</i>
+        """
+
+        js.document.getElementById("loading-msg").style.display = "none"
+        js.document.getElementById("controls").style.display = "flex"
+        js.document.getElementById("footer-area").style.display = "flex"
+
+        def get_math_ticket(strategy, num_count):
+            attempts = 0
+            while attempts < 10000:
+                attempts += 1
+                ticket = random.sample(range(1, 38), num_count)
+                ticket.sort()
+                
+                evens = sum(1 for n in ticket if n % 2 == 0)
+                odds = num_count - evens
+                highs = sum(1 for n in ticket if n > 18)
+                lows = num_count - highs
+                total_sum = sum(ticket)
+                
+                # תנאי ברזל לכל השיטות: טווח הסכומים הריאלי ביותר בלוטו
+                min_sum = int((num_count / 6.0) * 100)
+                max_sum = int((num_count / 6.0) * 165)
+                if not (min_sum <= total_sum <= max_sum):
+                    continue
+                
+                if strategy == "math_perfect":
+                    # איזון הרמוני מוחלט
+                    if abs(evens - odds) > 2: continue
+                    if abs(highs - lows) > 2: continue
+                    name = "פעמון גאוס 🔔 (איזון מושלם)"
+                    cls = "circle-human"
+                    
+                elif strategy == "math_high":
+                    # סילוק תאריכי ימי הולדת
+                    if highs <= lows: continue # דורש יותר מספרים גבוהים מנמוכים
+                    if ticket[0] < 5: continue # המספר הראשון חייב להיות מעל 4
+                    name = "אנטי-תאריכים 🛡️ (נטייה לגבוהים)"
+                    cls = "circle-machine"
+                    
+                else: # math_spread
+                    # מניעת צפיפות (מקסימום זוג צמוד אחד בלבד, לא יותר)
+                    consec_count = 0
+                    for i in range(num_count - 1):
+                        if ticket[i+1] == ticket[i] + 1:
+                            consec_count += 1
+                    if consec_count > (num_count // 4): continue
+                    name = "שיטת הדלתא 📐 (פיזור מקסימלי)"
+                    cls = "circle-machine"
+                    
+                # בחירת מספר חזק
+                strong_num = random.randint(1, 7)
+                return ticket, strong_num, name, cls
+                
+            # גיבוי במקרה חריג
+            ticket = random.sample(range(1, 38), num_count)
+            ticket.sort()
+            return ticket, random.randint(1, 7), "מערכת גיבוי מתמטית ⚙️", "circle-machine"
+
+        def generate_and_display(event=None):
+            num_houses = int(js.document.getElementById("house-count").value)
+            strategy = js.document.getElementById("strategy-select").value
+            num_per_ticket = int(js.document.getElementById("method-select").value)
+            
+            output_div = js.document.getElementById("output")
+            output_div.innerHTML = ""
+            html = ""
+            
+            for i in range(num_houses):
+                t, s, name, circle_class = get_math_ticket(strategy, num_per_ticket)
+                
+                nums_html = "".join([f'<div class="num-circle {circle_class}">{int(num):02d}</div>' for num in t])
+                strong_html = f'<div class="house-strong-circle">{s}</div>'
+                
+                html += f'''
+                <div class="house-wrapper">
+                    <div class="house-title">{name} | בית-{i+1:02d}</div>
+                    <div class="house-box">
+                        <div class="house-numbers">{nums_html}</div>
+                        {strong_html}
+                    </div>
+                </div>
+                '''
+            output_div.innerHTML = html
+    </script>
+</body>
+</html>
